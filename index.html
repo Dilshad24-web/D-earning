@@ -6,7 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <title> D-earning app </title>
+    <title> D-earning app - V2.3 (Admin History & Referral) </title>
     <style>
         :root {
             --primary-color: #007bff;
@@ -22,7 +22,7 @@
             --info-hover-color: #117a8b;
             --danger-color: #dc3545;
             --danger-hover-color: #b02a37;
-            --warning-color: #ffc107; 
+            --warning-color: #ffc107;
             --warning-hover-color: #e0a800;
             --light-bg: #f8f9fa;
             --dark-text: #343a40;
@@ -50,6 +50,22 @@
             overflow-x: hidden;
         }
 
+        #loadingIndicator {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5em;
+            color: var(--primary-color);
+        }
+        #loadingIndicator.show { display: flex; } /* Class to show it */
+
         .auth-container, .admin-panel, .container {
             background-color: var(--container-bg);
             border-radius: var(--border-radius-lg);
@@ -62,6 +78,7 @@
             border-top: 4px solid var(--primary-color);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
+        .admin-panel { max-width: 800px; } /* Increased max-width for admin panel */
         .auth-container:hover, .admin-panel:hover, .container:hover {
             box-shadow: var(--shadow-lg);
         }
@@ -74,11 +91,29 @@
         }
         .container h1 { font-size: 2.2em; }
         .auth-container h1 { font-size: 1.8em; }
+        .auth-container h2 { font-size: 1.5em; margin-bottom: 15px; color: var(--dark-text);}
+        .admin-panel h3 { margin-top: 20px; margin-bottom: 15px; color: var(--dark-text); font-size: 1.3em;}
+
+        #authMessage, #referralMessage {
+            color: var(--danger-color);
+            font-weight: 500;
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: var(--border-radius-md);
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            display: none;
+        }
+         #referralMessage {
+            margin-top: 10px;
+            font-size: 0.9em;
+        }
+
 
         .coin-display {
             font-size: 2em;
             font-weight: 700;
-            margin-bottom: 35px;
+            margin-bottom: 20px;
             color: var(--success-color);
             background-color: var(--light-bg);
             padding: 18px 25px;
@@ -102,10 +137,23 @@
             100% { transform: scale(1); background-color: var(--light-bg); color: var(--success-color); }
         }
 
-        .btn, .auth-btn {
+        #dailyBonusMessage {
+            font-size: 0.9em;
+            color: var(--info-color);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+        #spinCooldownMessage {
+            font-size: 0.9em;
+            color: var(--warning-color);
+            margin-bottom: 15px;
+            font-weight: 500;
+        }
+
+        .btn, .auth-btn, .admin-action-btn {
             color: white; border: none; padding: 14px 20px;
             border-radius: var(--border-radius-md); font-size: 1.05em;
-            font-weight: 600; cursor: pointer; margin: 10px 0;
+            font-weight: 600; cursor: pointer; margin: 8px 0;
             width: 100%; transition: all 0.25s ease-in-out;
             box-shadow: var(--shadow-sm); text-align: center;
             letter-spacing: 0.5px;
@@ -113,16 +161,16 @@
             align-items: center;
             justify-content: center;
         }
-        .btn:hover, .auth-btn:hover {
+        .btn:hover, .auth-btn:hover, .admin-action-btn:hover {
             transform: translateY(-3px) scale(1.02);
             box-shadow: var(--shadow-md);
         }
-        .btn:active, .auth-btn:active {
+        .btn:active, .auth-btn:active, .admin-action-btn:active {
             transform: translateY(0px) scale(1); box-shadow: var(--shadow-sm);
         }
         .auth-btn { margin-top: 15px; background-color: var(--primary-color); }
         .auth-btn:hover { background-color: var(--primary-hover-color); }
-        .btn:disabled, .auth-btn:disabled {
+        .btn:disabled, .auth-btn:disabled, .admin-action-btn:disabled {
             background-color: #b0bec5; color: #78909c;
             box-shadow: none; transform: none; cursor: not-allowed;
         }
@@ -133,12 +181,16 @@
             font-size: 1.2em; padding: 16px 22px; font-weight: 700;
         }
         .container #spinBtn:hover { background-color: var(--accent-hover-color); }
+        .container #claimDailyBonusBtn { background-color: var(--info-color); }
+        .container #claimDailyBonusBtn:hover { background-color: var(--info-hover-color); }
         .container #withdrawBtn { background-color: var(--success-color); }
         .container #withdrawBtn:hover { background-color: var(--success-hover-color); }
         .container #historyBtn { background-color: var(--info-color); }
         .container #historyBtn:hover { background-color: var(--info-hover-color); }
         .container .share-btn { background-color: var(--secondary-color); }
         .container .share-btn:hover { background-color: var(--secondary-hover-color); }
+        .support-btn { background-color: var(--warning-color) !important; color: var(--accent-text-color) !important; }
+        .support-btn:hover { background-color: var(--warning-hover-color) !important; }
         .container .logout-btn { background-color: var(--danger-color); }
         .container .logout-btn:hover { background-color: var(--danger-hover-color); }
 
@@ -156,6 +208,11 @@
             border-top: 4px solid var(--primary-color);
             animation: modalFadeIn 0.4s ease-out;
         }
+        #adminEditUserModal .modal-content { max-width: 500px; }
+        #adModal .modal-content { max-width: 350px; padding: 10px; background-color: transparent; border: none; box-shadow: none;}
+        #adModalContainer { min-height: 50px; }
+
+
         @keyframes modalFadeIn {
             from { opacity: 0; transform: translateY(-20px) scale(0.95); }
             to { opacity: 1; transform: translateY(0) scale(1); }
@@ -163,19 +220,16 @@
         .modal-content h2 {
             margin-top: 0; margin-bottom: 20px; color: var(--dark-text); font-size: 1.6em;
         }
-        .close-btn, .copy-link-btn-modal { /* Added .copy-link-btn-modal */
+        .close-btn {
             background-color: var(--secondary-color); color: white;
             border: none; padding: 10px 20px; border-radius: var(--border-radius-md);
             margin-top: 20px; cursor: pointer; font-weight: 500;
             transition: background-color 0.2s, transform 0.2s;
             width: auto; min-width: 120px;
         }
-        .copy-link-btn-modal { background-color: var(--success-color); } /* Specific style for copy button */
-        .close-btn:hover, .copy-link-btn-modal:hover {
+        .close-btn:hover {
             background-color: var(--secondary-hover-color); transform: translateY(-2px);
         }
-        .copy-link-btn-modal:hover { background-color: var(--success-hover-color); }
-
 
         .wheel-container { width: 280px; height: 280px; position: relative; margin: 25px auto; }
         .wheel {
@@ -217,30 +271,26 @@
             text-shadow: 1px 1px 3px rgba(0,0,0,0.8);
         }
 
-        .input-field {
+        .input-field, .admin-input-field, .admin-edit-input {
             width: calc(100% - 24px); padding: 14px; margin: 12px 0;
             border: 1px solid #bcccdc; border-radius: var(--border-radius-md);
             font-size: 1em; font-family: var(--font-family);
             box-sizing: border-box; transition: border-color 0.2s, box-shadow 0.2s;
         }
-        .input-field:focus {
+        .input-field:focus, .admin-input-field:focus, .admin-edit-input:focus {
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.2rem rgba(0,123,255,.2); outline: none;
         }
-        .input-field.small-input { 
-            width: 100px; display: inline-block; margin-right: 5px; padding: 10px; font-size: 0.9em;
-        }
-        #copyLinkModal .input-field { /* Specific style for link display in modal */
-            background-color: #f0f0f0;
-            border: 1px solid #ddd;
-            padding: 10px;
-            font-size: 0.95em;
-            word-break: break-all; /* Ensure long link wraps */
-            margin-bottom: 15px;
-            text-align: left;
-            color: #333;
-        }
+        .admin-input-field { width: calc(60% - 12px); margin-right: 10px; display: inline-block;}
+        .admin-edit-input { margin-bottom: 10px; }
+        .admin-edit-label { display: block; text-align: left; font-weight: 500; margin-bottom: 3px; font-size: 0.9em; }
 
+
+        .forgot-password-link {
+            display: block; text-align: right; font-size: 0.9em;
+            color: var(--primary-color); text-decoration: none; margin-top: -5px; margin-bottom: 10px;
+        }
+        .forgot-password-link:hover { text-decoration: underline; }
 
         .admin-btn-fixed {
             position: fixed; bottom: 20px; right: 20px;
@@ -251,61 +301,80 @@
         }
         .admin-btn-fixed:hover { background-color: #000; transform: scale(1.05); }
 
-        .withdrawal-item, .history-item, .user-list-item {
+        .withdrawal-item, .history-item, .user-list-item, .transaction-item, .all-transaction-item, .admin-setting-item {
             background-color: #fdfdff; padding: 15px; margin: 12px 0;
             border-radius: var(--border-radius-md); text-align: left;
             border: 1px solid #e0e6ec; box-shadow: var(--shadow-sm);
             transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
-        .withdrawal-item:hover, .history-item:hover, .user-list-item:hover {
+        .withdrawal-item:hover, .history-item:hover, .user-list-item:hover, .transaction-item:hover, .all-transaction-item:hover, .admin-setting-item:hover {
             transform: translateY(-2px); box-shadow: var(--shadow-md);
         }
-        .withdrawal-item p, .history-item p, .user-list-item p {
-            margin: 8px 0; font-size: 0.98em; line-height: 1.5;
+        .withdrawal-item p, .history-item p, .user-list-item p, .transaction-item p, .all-transaction-item p, .admin-setting-item p {
+            margin: 8px 0; font-size: 0.95em; line-height: 1.5;
         }
-        .history-item p strong, .withdrawal-item p strong, .user-list-item p strong {
+        .history-item p strong, .withdrawal-item p strong, .user-list-item p strong, .transaction-item p strong, .all-transaction-item p strong, .admin-setting-item p strong {
             color: var(--dark-text); margin-right: 5px;
-            min-width: 80px; display: inline-block;
+            min-width: 90px; display: inline-block;
         }
+        .admin-setting-item input[type="number"], .admin-setting-item input[type="text"], .admin-setting-item textarea {
+             width: 250px; padding: 8px; border-radius: var(--border-radius-md); border: 1px solid #ccc;
+             box-sizing: border-box;
+        }
+        .admin-setting-item textarea { height: 100px; resize: vertical; }
+        .admin-setting-item button { margin-left: 10px; padding: 8px 12px;}
+
+
         .status-pending::before { content: "⏳ "; font-size: 1.1em; vertical-align: middle; }
         .status-approved::before { content: "✅ "; font-size: 1.1em; vertical-align: middle; }
         .status-rejected::before { content: "❌ "; font-size: 1.1em; vertical-align: middle; }
-        .status-pending { color: #ff9800; }
-        .status-approved { color: var(--success-color); }
-        .status-rejected { color: var(--danger-color); }
+        .status-banned::before { content: "🚫 "; font-size: 1.1em; vertical-align: middle; }
+        .status-pending { color: #ff9800; font-weight: bold;}
+        .status-approved { color: var(--success-color); font-weight: bold;}
+        .status-rejected { color: var(--danger-color); font-weight: bold;}
         .status-banned { color: var(--danger-color); font-weight: bold; }
         .status-active { color: var(--success-color); font-weight: bold; }
+        .transaction-type-spin_win::before { content: "🎰 "; }
+        .transaction-type-bonus::before, .transaction-type-referral_bonus::before { content: "🎁 "; }
+        .transaction-type-admin_gift::before { content: "👑 "; } /* System Gift Icon */
+        .transaction-type-admin_deduction::before { content: "🛠️ "; } /* System Deduction Icon */
+        .transaction-type-withdrawal_request::before { content: "💸 "; }
+        .transaction-type-withdrawal_reject_refund::before { content: "💰 "; }
 
 
-        .action-btn {
+        .action-btn, .admin-user-action-btn {
             color: white; border: none; padding: 8px 12px;
-            border-radius: 6px; margin-top: 10px; margin-right: 8px;
-            cursor: pointer; font-size: 0.9em; font-weight: 500;
+            border-radius: 6px; margin-top: 5px; margin-right: 8px; margin-bottom: 5px;
+            cursor: pointer; font-size: 0.85em; font-weight: 500;
             transition: opacity 0.2s, transform 0.2s;
+            min-width: 70px;
         }
-        .action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
+        .action-btn:hover, .admin-user-action-btn:hover { opacity: 0.9; transform: translateY(-1px); }
         .approve-btn { background-color: var(--success-color); }
         .reject-btn { background-color: var(--danger-color); }
-        .ban-user-btn { /* Styles will be set dynamically */ }
-        .add-coins-btn { background-color: var(--success-color); }
-        .remove-coins-btn { background-color: var(--warning-color); color: var(--accent-text-color); }
-        .remove-coins-btn:hover { background-color: var(--warning-hover-color); }
+        .ban-btn { background-color: var(--danger-color); }
+        .unban-btn { background-color: var(--success-color); }
+        .edit-btn { background-color: var(--info-color); }
+        .admin-coin-btn { background-color: var(--info-color); font-size: 0.8em; padding: 6px 10px; width: auto; margin-left: 5px;}
 
-        #historyList, #adminUsersListDiv, #adminWithdrawalsListDiv { 
+        .user-actions-group { margin-top: 10px; border-top: 1px dashed #eee; padding-top:10px;}
+        .user-actions-group .admin-input-field { width: 100px; font-size: 0.9em; padding: 8px; margin: 0 5px 8px 0;}
+
+        /* Scrollbar styles */
+        #historyList, #adminUsersListDiv, #adminWheelSettingsList, #transactionHistoryListDiv, #adminWithdrawalsListDiv, #adminAppLogsListDiv, #adminAllTransactionsListDiv, #adminSettingsListDiv {
             max-height: 350px; overflow-y: auto; padding-right: 10px;
         }
-        #historyList::-webkit-scrollbar, #adminUsersListDiv::-webkit-scrollbar, #adminWithdrawalsListDiv::-webkit-scrollbar { width: 8px; }
-        #historyList::-webkit-scrollbar-track, #adminUsersListDiv::-webkit-scrollbar-track, #adminWithdrawalsListDiv::-webkit-scrollbar-track { background: #e9edf1; border-radius: 10px; }
-        #historyList::-webkit-scrollbar-thumb, #adminUsersListDiv::-webkit-scrollbar-thumb, #adminWithdrawalsListDiv::-webkit-scrollbar-thumb { background: #b0bec5; border-radius: 10px; }
-        #historyList::-webkit-scrollbar-thumb:hover, #adminUsersListDiv::-webkit-scrollbar-thumb:hover, #adminWithdrawalsListDiv::-webkit-scrollbar-thumb:hover { background: #90a4ae; }
+        #historyList::-webkit-scrollbar, #adminUsersListDiv::-webkit-scrollbar, #adminWheelSettingsList::-webkit-scrollbar, #transactionHistoryListDiv::-webkit-scrollbar, #adminWithdrawalsListDiv::-webkit-scrollbar, #adminAppLogsListDiv::-webkit-scrollbar, #adminAllTransactionsListDiv::-webkit-scrollbar, #adminSettingsListDiv::-webkit-scrollbar { width: 8px; }
+        #historyList::-webkit-scrollbar-track, #adminUsersListDiv::-webkit-scrollbar-track, #adminWheelSettingsList::-webkit-scrollbar-track, #transactionHistoryListDiv::-webkit-scrollbar-track, #adminWithdrawalsListDiv::-webkit-scrollbar-track, #adminAppLogsListDiv::-webkit-scrollbar-track, #adminAllTransactionsListDiv::-webkit-scrollbar-track, #adminSettingsListDiv::-webkit-scrollbar-track { background: #e9edf1; border-radius: 10px; }
+        #historyList::-webkit-scrollbar-thumb, #adminUsersListDiv::-webkit-scrollbar-thumb, #adminWheelSettingsList::-webkit-scrollbar-thumb, #transactionHistoryListDiv::-webkit-scrollbar-thumb, #adminWithdrawalsListDiv::-webkit-scrollbar-thumb, #adminAppLogsListDiv::-webkit-scrollbar-thumb, #adminAllTransactionsListDiv::-webkit-scrollbar-thumb, #adminSettingsListDiv::-webkit-scrollbar-thumb { background: #b0bec5; border-radius: 10px; }
+        #historyList::-webkit-scrollbar-thumb:hover, #adminUsersListDiv::-webkit-scrollbar-thumb:hover, #adminWheelSettingsList::-webkit-scrollbar-thumb:hover, #transactionHistoryListDiv::-webkit-scrollbar-thumb:hover, #adminWithdrawalsListDiv::-webkit-scrollbar-thumb:hover, #adminAppLogsListDiv::-webkit-scrollbar-thumb:hover, #adminAllTransactionsListDiv::-webkit-scrollbar-thumb:hover, #adminSettingsListDiv::-webkit-scrollbar-thumb:hover { background: #90a4ae; }
 
-        .tabs { margin-bottom: 25px; display: flex; justify-content: center; flex-wrap: wrap; } 
+        .tabs { margin-bottom: 25px; display: flex; flex-wrap: wrap; justify-content: center; }
         .tabs button {
-            padding: 10px 15px; 
-            margin: 5px; 
+            padding: 10px 15px; margin: 5px;
             border: 1px solid #ced4da; background-color: #e9ecef;
             cursor: pointer; border-radius: var(--border-radius-md);
-            font-weight: 600; font-size: 0.90em; 
+            font-weight: 600; font-size: 0.85em;
             transition: all 0.25s; color: var(--dark-text);
         }
         .tabs button:hover { background-color: #d8dde3; border-color: #b0bac4; }
@@ -314,6 +383,7 @@
             border-color: var(--primary-color);
             box-shadow: 0 3px 8px rgba(0,123,255,.3);
         }
+        .sub-tabs { margin-top: 20px; margin-bottom: 15px;}
 
         .result-modal-content { border-top: 4px solid var(--accent-color); }
         .result-icon {
@@ -343,58 +413,179 @@
             box-shadow: var(--shadow-sm);
         }
 
-        #spinWheelConfigContainer .segment-config-item {
+        /* Wheel Settings Admin Styles */
+        .wheel-segment-admin-item {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 10px; border-bottom: 1px solid #eee;
+        }
+        .wheel-segment-admin-item:last-child { border-bottom: none; }
+        .wheel-segment-admin-item span { margin-right: 10px; font-weight: 500;}
+        .wheel-segment-admin-item input[type="number"] {
+            width: 80px; padding: 8px; border-radius: var(--border-radius-md);
+            border: 1px solid #ccc; text-align: center;
+        }
+        .wheel-segment-color-preview {
+            width: 20px; height: 20px; border-radius: 4px; display: inline-block;
+            margin-right: 8px; border: 1px solid #ccc;
+        }
+        #saveWheelSettingsBtn {
+            background-color: var(--success-color);
+            margin-top: 20px;
+        }
+        #saveWheelSettingsBtn:hover { background-color: var(--success-hover-color); }
+
+        /* Share App Modal Styles */
+        #shareAppModalContent {
+            max-width: 420px; /* Slightly wider for referral */
+        }
+        #shareAppModalContent h2 {
+            font-size: 1.4em;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        #shareAppModalContent p {
+            font-size: 0.95em;
+            color: #555;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+        .share-link-container {
+            margin: 15px 0;
+        }
+        .share-link-container input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            background-color: #f0f0f0;
+            border-radius: var(--border-radius-md);
+            text-align: center;
+            font-size: 0.9em;
+            box-sizing: border-box;
+            color: #333;
+            cursor: default;
+        }
+        .share-modal-buttons {
             display: flex;
-            align-items: center;
             justify-content: space-between;
-            padding: 10px;
-            margin-bottom: 8px;
-            border: 1px solid #eee;
-            border-radius: var(--border-radius-md);
-            background-color: #f9f9f9;
+            margin-top: 20px;
+            gap: 15px;
         }
-        #spinWheelConfigContainer .segment-config-item label {
-            font-weight: 500;
-            margin-right: 10px;
+        .share-modal-buttons .btn {
+            flex-grow: 1;
+            margin: 0;
+            padding: 12px 15px;
+            font-size: 1em;
         }
-        #spinWheelConfigContainer .segment-config-item input[type="number"] {
-            width: 80px;
+        #userReferralCodeDisplay {
+            font-weight: bold;
+            color: var(--primary-color);
+            background-color: var(--light-bg);
             padding: 8px;
-            border: 1px solid #ccc;
             border-radius: var(--border-radius-md);
-            text-align: right;
+            margin-bottom: 15px;
+            border: 1px dashed var(--primary-color);
         }
-        #spinWheelConfigContainer .segment-color-display {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            margin-left: 10px;
+        .referral-input-section {
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+        }
+        .referral-input-section p {
+            font-size: 0.9em;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+
+        /* Admin Search/Filter */
+        .admin-search-filter-container {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+            gap: 10px;
+        }
+        .admin-search-filter-container input[type="text"],
+        .admin-search-filter-container select {
+            padding: 10px;
+            border-radius: var(--border-radius-md);
             border: 1px solid #ccc;
+            flex-grow: 1;
+            min-width: 150px; /* Minimum width for inputs */
         }
+
+        /* Admin Stats */
+        .admin-stats-container {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: var(--light-bg);
+            border-radius: var(--border-radius-md);
+            box-shadow: var(--shadow-sm);
+        }
+        .admin-stat-item {
+            text-align: center;
+            flex-basis: 150px;
+            padding: 5px;
+        }
+        .admin-stat-item p { margin: 5px 0; font-size: 0.9em; color: var(--dark-text); }
+        .admin-stat-item strong { font-size: 1.3em; color: var(--primary-color); }
 
     </style>
 </head>
 <body>
+    <div id="loadingIndicator">Loading...</div>
+
     <!-- Authentication Screen -->
     <div class="auth-container" id="authScreen">
         <h1>Welcome Back!</h1>
-        <div id="authTabs" class="tabs">
-            <button id="showLoginTabBtn" class="active">Login</button>
-            <button id="showRegisterTabBtn">Register</button>
+        <div id="authMessage"></div>
+        <div id="authModeTabs" class="tabs">
+            <button id="showLoginFormsBtn" class="active">Login</button>
+            <button id="showRegisterFormsBtn">Register</button>
         </div>
 
-        <div id="loginForm">
-            <h2>Login to Your Account</h2>
-            <input type="text" class="input-field" id="loginPhoneNumber" placeholder="Phone Number" required>
-            <input type="text" class="input-field" id="loginName" placeholder="Your Name (as password)" required>
-            <button class="auth-btn" id="loginBtn">Login</button>
+        <div id="loginFormsContainer">
+            <div class="tabs sub-tabs" id="loginTypeTabs">
+                <button id="showEmailLoginTabBtn" class="active">With Email</button>
+                <button id="showPhoneLoginTabBtn">With Phone</button>
+            </div>
+            <div id="loginEmailForm">
+                <h2>Login with Email</h2>
+                <input type="email" class="input-field" id="loginEmail" placeholder="Email" required>
+                <input type="password" class="input-field" id="loginPassword" placeholder="Password" required>
+                <a href="#" id="forgotPasswordLink" class="forgot-password-link">Forgot Password?</a>
+                <button class="auth-btn" id="loginEmailBtn">Login</button>
+            </div>
+            <div id="loginPhoneForm" style="display:none;">
+                <h2>Login with Phone</h2>
+                <input type="text" class="input-field" id="loginPhoneNumberPhone" placeholder="Phone Number" required>
+                <input type="password" class="input-field" id="loginPhonePassword" placeholder="Password / Your Name (for old accounts)" required>
+                <button class="auth-btn" id="loginPhoneBtn">Login</button>
+            </div>
         </div>
 
-        <div id="registerForm" style="display: none;">
-            <h2>Create New Account</h2>
-            <input type="text" class="input-field" id="registerName" placeholder="Your Name" required>
-            <input type="text" class="input-field" id="registerPhoneNumber" placeholder="Phone Number" required>
-            <button class="auth-btn" id="registerBtn">Register</button>
+        <div id="registerFormsContainer" style="display:none;">
+            <div class="tabs sub-tabs" id="registerTypeTabs">
+                <button id="showEmailRegisterTabBtn" class="active">With Email</button>
+                <button id="showPhoneRegisterTabBtn">With Phone</button>
+            </div>
+            <div id="registerEmailPasswordForm">
+                <h2>Register with Email</h2>
+                <input type="text" class="input-field" id="registerNameEmail" placeholder="Your Name (letters/numbers only)" required>
+                <input type="email" class="input-field" id="registerEmail" placeholder="Email" required>
+                <input type="password" class="input-field" id="registerPassword" placeholder="Password (min 6 chars)" required>
+                <button class="auth-btn" id="registerEmailBtn">Register</button>
+            </div>
+            <div id="registerPhoneForm" style="display:none;">
+                <h2>Register with Phone</h2>
+                <input type="text" class="input-field" id="registerNamePhone" placeholder="Your Name (letters/numbers only)" required>
+                <input type="text" class="input-field" id="registerPhoneNumberPhone" placeholder="Phone Number (10 digits)" required>
+                <input type="password" class="input-field" id="registerPhonePassword" placeholder="Password (min 6 chars)" required>
+                <button class="auth-btn" id="registerPhoneBtn">Register</button>
+            </div>
         </div>
 
         <div style="text-align: center; margin-top: 20px; margin-bottom:5px; color: #555;">OR</div>
@@ -402,125 +593,235 @@
             <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google G" style="width: 18px; height: 18px; vertical-align: middle; margin-right: 10px;">
             Sign in with Google
         </button>
+        <button class="btn support-btn" id="authContactSupportBtn" style="margin-top: 15px;">💬 Contact Support</button>
     </div>
 
     <!-- Main App Screen (Initially Hidden) -->
     <div class="container" id="appContainer" style="display: none;">
         <h1 id="welcomeMessage">Spin & Win Rewards</h1>
         <div class="coin-display" id="coinDisplay">Coins: 0 (₹0.00)</div>
+        <div id="dailyBonusMessage"></div>
+        <button class="btn" id="claimDailyBonusBtn" style="display:none;">🎁 Claim Daily Bonus</button>
+        <div id="spinCooldownMessage"></div>
         <button class="btn" id="spinBtn">🎉 Spin the Wheel! 🎉</button>
         <button class="btn" id="withdrawBtn">💸 Withdraw Coins</button>
-        <button class="btn" id="historyBtn">📜 Withdrawal History</button>
-        <button class="btn share-btn" id="shareAppBtn">💌 Share App</button>
+        <button class="btn" id="historyBtn">📜 Transaction History</button>
+        <button class="btn share-btn" id="shareAppBtn">💌 Share App & Referral</button>
+        <button class="btn support-btn" id="contactSupportBtn">💬 Contact Support</button>
         <button class="btn logout-btn" id="logoutBtn">🚪 Logout</button>
     </div>
 
-    <div class="banner-ad-container-2" id="bannerAdContainer2">
-        <!-- Ad script will be loaded here -->
-    </div>
+    <div class="banner-ad-container-2" id="bannerAdContainer2"></div>
 
     <!-- Admin Panel (Initially Hidden) -->
     <div class="admin-panel" id="adminPanel" style="display: none;">
         <h2>🛡️ Admin Panel</h2>
+        <div class="admin-stats-container">
+            <div class="admin-stat-item">
+                <p>Total Users</p>
+                <strong id="adminStatTotalUsers">0</strong>
+            </div>
+            <div class="admin-stat-item">
+                <p>Est. Circulating Coins</p>
+                <strong id="adminStatTotalCoinsAwarded">0</strong>
+            </div>
+            <div class="admin-stat-item">
+                <p>Pending Withdrawals</p>
+                <strong id="adminStatPendingWithdrawals">0</strong>
+            </div>
+             <div class="admin-stat-item">
+                <p>Total Paid (Coins)</p>
+                <strong id="adminStatTotalPaidCoins">0</strong>
+            </div>
+        </div>
         <div class="tabs">
-            <button id="adminWithdrawalsTab" class="active">Withdrawal Requests</button>
-            <button id="adminUsersTab">Users List</button>
-            <button id="adminSettingsTab">App Settings</button>
+            <button id="adminWithdrawalsTab" class="active">Withdrawals</button>
+            <button id="adminUsersTab">Users</button>
+            <button id="adminAllTransactionsTab">User Activity</button>
+            <button id="adminAppSettingsTab">App Settings</button>
+            <button id="adminAppLogsTab">App Logs</button>
         </div>
 
         <div id="adminWithdrawalsContent">
-            <h3>Pending Withdrawals</h3>
+            <h3>Withdrawal Requests</h3>
+            <div class="admin-search-filter-container">
+                <input type="text" id="adminWithdrawalSearchInput" placeholder="Search User ID, Name, UPI...">
+                <select id="adminWithdrawalStatusFilter">
+                    <option value="all">All Statuses</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="rejected">Rejected</option>
+                </select>
+            </div>
             <div id="adminWithdrawalsListDiv"></div>
         </div>
 
         <div id="adminUsersContent" style="display: none;">
             <h3>Registered Users</h3>
+             <div class="admin-search-filter-container">
+                <input type="text" id="adminUserSearchInput" placeholder="Search Name, Email, Phone, ID...">
+            </div>
             <div id="adminUsersListDiv"></div>
         </div>
 
-        <div id="adminSettingsContent" style="display: none;">
-            <h3>Spin Wheel Prize Configuration</h3>
-             <p style="font-size:0.9em; color: var(--dark-text); background-color: #e6f7ff; border-left: 4px solid var(--info-color); padding: 10px; border-radius: var(--border-radius-md); margin-bottom: 15px;">
-                Changes made here will be saved globally and will affect all users.
-            </p>
-            <div id="spinWheelConfigContainer">
-                <!-- Segments will be rendered here by JS -->
+        <div id="adminAllTransactionsContent" style="display: none;">
+            <h3>All User Transactions (Recent 100)</h3>
+            <div class="admin-search-filter-container">
+                <input type="text" id="adminAllTxSearchInput" placeholder="Search User ID, Name, Type...">
+                <select id="adminAllTxTypeFilter">
+                    <option value="all">All Types</option>
+                    <option value="spin_win">Spin Win</option>
+                    <option value="bonus">Bonus</option>
+                    <option value="referral_bonus">Referral Bonus</option>
+                    <option value="admin_gift">Admin Gift</option>
+                    <option value="admin_deduction">Admin Deduction</option>
+                    <option value="withdrawal_request">Withdrawal Req</option>
+                    <option value="withdrawal_reject_refund">Withdrawal Refund</option>
+                </select>
             </div>
-            <button id="saveSpinWheelConfigBtn" class="btn" style="background-color: var(--primary-color); margin-top:20px; width:auto; padding-left:25px; padding-right:25px;">Apply & Save Wheel Changes</button>
+            <div id="adminAllTransactionsListDiv"></div>
         </div>
 
-        <button class="btn" id="backToAppBtn" style="background-color: var(--secondary-color); margin-top: 25px;">Back to App/Login</button>
+        <div id="adminAppSettingsContent" style="display: none;">
+            <h3>Application Settings</h3>
+            <div id="adminSettingsListDiv">
+                <!-- Populated by renderAdminAppSettings -->
+            </div>
+            <h3>Configure Wheel Segment Coins</h3>
+            <div id="adminWheelSettingsList"></div>
+            <button class="admin-action-btn" id="saveWheelSettingsBtn" style="background-color: var(--success-color); margin-top: 15px;">Save Wheel Settings</button>
+        </div>
+
+        <div id="adminAppLogsContent" style="display: none;">
+            <h3>Application Logs (Recent 50)</h3>
+            <div id="adminAppLogsListDiv" style="max-height: 400px; overflow-y: auto; text-align: left; font-size: 0.8em; background: #f0f0f0; padding:10px; border-radius:var(--border-radius-md);"></div>
+        </div>
+
+        <button class="btn" id="backToAppBtn" style="background-color: var(--secondary-color); margin-top: 20px;">Back to App/Login</button>
     </div>
     <button class="admin-btn-fixed" id="adminAccessBtn">Admin</button>
 
-    <!-- Spin Wheel Modal -->
+    <!-- Modals -->
     <div class="modal" id="spinModal">
         <div class="modal-content">
             <h2>Spin the Wheel!</h2>
             <div class="wheel-container">
-                <div class="wheel" id="wheel">
-                    <div class="wheel-center"></div>
-                </div>
+                <div class="wheel" id="wheel"><div class="wheel-center"></div></div>
                 <div class="wheel-static-pointer"></div>
             </div>
-            <p style="margin-top: 20px; font-size: 1em; color: #555;">Tap the wheel to spin for glory!</p>
+            <p style="margin-top: 20px; font-size: 1em; color: #555;">Tap the wheel to spin!</p>
             <button class="close-btn" id="closeSpinModalBtn">Close</button>
         </div>
     </div>
-
-    <!-- Spin Result Modal -->
     <div class="modal" id="spinResultModal">
         <div class="modal-content result-modal-content">
-            <span class="result-icon">🎉</span>
-            <h2>Woohoo!</h2>
+            <span class="result-icon">🎉</span><h2>Woohoo!</h2>
             <p class="winnings-text">You've won <strong id="spinWinningsAmount">X</strong> coins!</p>
             <button class="btn" id="collectWinningsBtn">Awesome!</button>
         </div>
     </div>
-
-    <!-- Withdraw Modal -->
     <div class="modal" id="withdrawModal">
         <div class="modal-content">
             <h2>Withdraw Coins</h2>
-            <p>Withdraw <strong>1000 coins (₹10.00)</strong>.</p>
-            <p style="font-size:0.9em; color: #666;">Minimum balance of 1000 coins required.</p>
-            <input type="text" class="input-field" id="upiIdInput" placeholder="Your UPI ID (e.g., name@okhdfcbank)">
-            <button class="btn" id="submitWithdrawBtn" style="background-color: var(--success-color);">Submit Request (1000 Coins)</button>
+            <p>Your current balance: <strong id="withdrawModalCoinBalance">0</strong> coins.</p>
+            <input type="number" class="input-field" id="withdrawAmountInput" placeholder="Amount to withdraw (e.g. 500)">
+            <p style="font-size:0.9em; color: #666;">Min: <span id="minWithdrawDisplay">100</span> coins, Max: <span id="maxWithdrawDisplay">5000</span> coins per request.</p>
+            <input type="text" class="input-field" id="upiIdInput" placeholder="Your UPI ID">
+            <button class="btn" id="submitWithdrawBtn" style="background-color: var(--success-color);">Submit Request</button>
             <button class="close-btn" id="closeWithdrawModalBtn">Cancel</button>
         </div>
     </div>
-
-    <!-- Withdrawal History Modal -->
     <div class="modal" id="historyModal">
-        <div class="modal-content">
-            <h2>Withdrawal History</h2>
-            <div id="historyList">
-            </div>
+        <div class="modal-content" style="max-width: 500px;">
+            <h2>Transaction History</h2>
+            <div id="transactionHistoryListDiv"></div>
             <button class="close-btn" id="closeHistoryModalBtn">Close</button>
         </div>
     </div>
 
-    <!-- New Copy Link Modal -->
-    <div class="modal" id="copyLinkModal">
-        <div class="modal-content">
-            <h2>Share App Download Link</h2>
-            <p>Native sharing is not available. You can copy the download link below:</p>
-            <input type="text" class="input-field" id="appDownloadLinkDisplay" readonly>
-            <button class="copy-link-btn-modal" id="copyLinkBtnInModal">Copy Link</button>
-            <button class="close-btn" id="closeCopyLinkModalBtn">Close</button>
+    <div class="modal" id="shareAppModal">
+        <div class="modal-content" id="shareAppModalContent">
+            <h2>Share App & Referral</h2>
+            <p>Share the app download link with your friends!</p>
+            <div class="share-link-container">
+                <input type="text" id="appDownloadLinkInput" value="https://www.mediafire.com/file/4cxvbs4uxeza0b1/D-earning.apk/file" readonly>
+            </div>
+             <div class="share-modal-buttons">
+                <button class="btn" id="copyDownloadLinkBtn" style="background-color: var(--success-color);">Copy Link</button>
+            </div>
+
+            <div id="userReferralCodeSection" style="margin-top: 20px;">
+                <p>Your Referral Code:</p>
+                <div id="userReferralCodeDisplay">Loading...</div>
+            </div>
+
+            <div class="referral-input-section">
+                <p>Got a referral code? Enter it here for a bonus! (Bonus: <span id="referralBonusDisplay">0</span> coins)</p>
+                <input type="text" class="input-field" id="referralCodeInput" placeholder="Enter Referral Code">
+                <button class="btn" id="submitReferralCodeBtn" style="background-color: var(--accent-color); color: var(--accent-text-color); margin-top: 5px; font-size: 1em;">Submit Code</button>
+                <div id="referralMessage"></div>
+            </div>
+            <button class="close-btn" id="closeShareAppModalBtn" style="margin-top:25px;">Close</button>
         </div>
     </div>
 
+    <!-- Admin Edit User Modal -->
+    <div class="modal" id="adminEditUserModal">
+        <div class="modal-content">
+            <h2>Edit User Details</h2>
+            <form id="adminEditUserForm">
+                <input type="hidden" id="adminEditUserId">
+                <div>
+                    <label for="adminEditUserName" class="admin-edit-label">Name:</label>
+                    <input type="text" id="adminEditUserName" class="admin-edit-input">
+                </div>
+                <div>
+                    <label for="adminEditUserEmail" class="admin-edit-label">Email:</label>
+                    <input type="email" id="adminEditUserEmail" class="admin-edit-input">
+                </div>
+                <div>
+                    <label for="adminEditUserPhone" class="admin-edit-label">Phone:</label>
+                    <input type="text" id="adminEditUserPhone" class="admin-edit-input">
+                </div>
+                <div>
+                    <label for="adminEditUserCoins" class="admin-edit-label">Coins:</label>
+                    <input type="number" id="adminEditUserCoins" class="admin-edit-input">
+                </div>
+                 <div>
+                    <label for="adminEditUserPassword" class="admin-edit-label">Password (for phone auth only, optional):</label>
+                    <input type="text" id="adminEditUserPassword" class="admin-edit-input" placeholder="Leave blank to keep current">
+                </div>
+                <div>
+                    <label for="adminEditUserIsBanned" class="admin-edit-label">Is Banned:</label>
+                    <select id="adminEditUserIsBanned" class="admin-edit-input">
+                        <option value="false">No (Active)</option>
+                        <option value="true">Yes (Banned)</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn" style="background-color: var(--success-color);">Save Changes</button>
+                <button type="button" class="close-btn" id="closeAdminEditUserModalBtn">Cancel</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Ad Modal -->
+    <div class="modal" id="adModal">
+        <div class="modal-content">
+            <div id="adModalContainer">
+                <!-- Ad code will be injected here -->
+            </div>
+            <button class="close-btn" id="closeAdModalBtn" style="margin-top: 10px; padding: 8px 15px; font-size: 0.9em;">Close Ad</button>
+        </div>
+    </div>
+
+
     <script type="module">
-        // Firebase SDK imports
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getDatabase, ref, get, set, update, serverTimestamp as fbServerTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+        import { getDatabase, ref, get, set, update, serverTimestamp as fbServerTimestamp, query, orderByChild, limitToLast, onValue, equalTo } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
         import {
-            getAuth,
-            GoogleAuthProvider,
-            signInWithPopup,
-            signOut as fbSignOut,
-            onAuthStateChanged
+            getAuth, GoogleAuthProvider, signInWithPopup, createUserWithEmailAndPassword,
+            signInWithEmailAndPassword, signOut as fbSignOut, onAuthStateChanged,
+            sendPasswordResetEmail
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
 
         const firebaseConfig = {
@@ -544,64 +845,122 @@
 
         let usersData = {};
         let allWithdrawals = {};
+        let appLogs = [];
+        let allSystemTransactionsCache = [];
+        let userTransactionsListener = null;
+
+        let appSettings = {
+            dailyBonusAmount: 50,
+            referralBonusAmount: 50,
+            minWithdrawal: 100,
+            maxWithdrawal: 5000,
+            shareLink: "https://www.mediafire.com/file/4cxvbs4uxeza0b1/D-earning.apk/file",
+            contactSupportLink: "https://t.me/YourTelegramUsername",
+            adCodeAfterSpin: "<!-- Default Ad Code Placeholder -->"
+        };
 
         let isAdminView = false;
         let isSpinning = false;
-        const FIXED_WITHDRAWAL_AMOUNT = 1000;
+        let spinCooldownTimer = null;
+
         const INITIAL_COINS = 100;
         const ADMIN_PASSWORD = "@Dilshad4949E";
+        const SHORT_SPIN_COOLDOWN_SECONDS = 10;
 
-        const APP_DOWNLOAD_LINK = "https://www.mediafire.com/file/4cxvbs4uxeza0b1/D-earning.apk/file";
+        const defaultWheelSegments = [
+            { text: '5', color: '#FF6384' }, { text: '30', color: '#36A2EB' },
+            { text: '10', color: '#FFCE56' }, { text: '35', color: '#4BC0C0' },
+            { text: '15', color: '#9966FF' }, { text: '40', color: '#FF9F40' },
+            { text: '20', color: '#8AC249' }, { text: '45', color: '#EA5545' },
+            { text: '25', color: '#F46A9B' }, { text: '50', color: '#EF9B20' }
+        ];
+        let activeWheelSegments = [...defaultWheelSegments.map(s => ({...s}))];
+        let numSegments = activeWheelSegments.length;
+        let anglePerSegment = 360 / numSegments;
 
-
+        // DOM Elements
+        const authContactSupportBtn = document.getElementById('authContactSupportBtn');
+        const adModal = document.getElementById('adModal');
+        const adModalContainer = document.getElementById('adModalContainer');
+        const closeAdModalBtn = document.getElementById('closeAdModalBtn');
+        const contactSupportBtn = document.getElementById('contactSupportBtn');
+        const loginPhonePasswordInput = document.getElementById('loginPhonePassword');
+        const registerPhonePasswordInput = document.getElementById('registerPhonePassword');
+        const adminAppSettingsTab = document.getElementById('adminAppSettingsTab');
+        const adminAppSettingsContent = document.getElementById('adminAppSettingsContent');
+        const adminSettingsListDiv = document.getElementById('adminSettingsListDiv');
+        const adminEditUserModal = document.getElementById('adminEditUserModal');
+        const adminEditUserForm = document.getElementById('adminEditUserForm');
+        const closeAdminEditUserModalBtn = document.getElementById('closeAdminEditUserModalBtn');
+        const minWithdrawDisplay = document.getElementById('minWithdrawDisplay');
+        const maxWithdrawDisplay = document.getElementById('maxWithdrawDisplay');
+        const referralBonusDisplay = document.getElementById('referralBonusDisplay');
+        const loadingIndicator = document.getElementById('loadingIndicator');
         const authScreen = document.getElementById('authScreen');
         const appContainer = document.getElementById('appContainer');
         const adminPanel = document.getElementById('adminPanel');
         const bannerAdContainer2 = document.getElementById('bannerAdContainer2');
-
-        const loginForm = document.getElementById('loginForm');
-        const registerForm = document.getElementById('registerForm');
-        const showLoginTabBtn = document.getElementById('showLoginTabBtn');
-        const showRegisterTabBtn = document.getElementById('showRegisterTabBtn');
-
-        const loginPhoneNumberInput = document.getElementById('loginPhoneNumber');
-        const loginNameInput = document.getElementById('loginName');
-        const loginBtn = document.getElementById('loginBtn');
-        const registerNameInput = document.getElementById('registerName');
-        const registerPhoneNumberInput = document.getElementById('registerPhoneNumber');
-        const registerBtn = document.getElementById('registerBtn');
+        const authMessageDiv = document.getElementById('authMessage');
+        const referralMessageDiv = document.getElementById('referralMessage');
+        const showLoginFormsBtn = document.getElementById('showLoginFormsBtn');
+        const showRegisterFormsBtn = document.getElementById('showRegisterFormsBtn');
+        const loginFormsContainer = document.getElementById('loginFormsContainer');
+        const registerFormsContainer = document.getElementById('registerFormsContainer');
+        const showEmailLoginTabBtn = document.getElementById('showEmailLoginTabBtn');
+        const showPhoneLoginTabBtn = document.getElementById('showPhoneLoginTabBtn');
+        const loginEmailForm = document.getElementById('loginEmailForm');
+        const loginPhoneForm = document.getElementById('loginPhoneForm');
+        const loginEmailInput = document.getElementById('loginEmail');
+        const loginPasswordInput = document.getElementById('loginPassword');
+        const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+        const loginEmailBtn = document.getElementById('loginEmailBtn');
+        const loginPhoneNumberPhoneInput = document.getElementById('loginPhoneNumberPhone');
+        const loginPhoneBtn = document.getElementById('loginPhoneBtn');
+        const showEmailRegisterTabBtn = document.getElementById('showEmailRegisterTabBtn');
+        const showPhoneRegisterTabBtn = document.getElementById('showPhoneRegisterTabBtn');
+        const registerEmailPasswordForm = document.getElementById('registerEmailPasswordForm');
+        const registerPhoneForm = document.getElementById('registerPhoneForm');
+        const registerNameEmailInput = document.getElementById('registerNameEmail');
+        const registerEmailInput = document.getElementById('registerEmail');
+        const registerPasswordInput = document.getElementById('registerPassword');
+        const registerEmailBtn = document.getElementById('registerEmailBtn');
+        const registerNamePhoneInput = document.getElementById('registerNamePhone');
+        const registerPhoneNumberPhoneInput = document.getElementById('registerPhoneNumberPhone');
+        const registerPhoneBtn = document.getElementById('registerPhoneBtn');
         const googleSignInBtn = document.getElementById('googleSignInBtn');
         const logoutBtn = document.getElementById('logoutBtn');
-
         const welcomeMessage = document.getElementById('welcomeMessage');
         const coinDisplay = document.getElementById('coinDisplay');
+        const dailyBonusMessage = document.getElementById('dailyBonusMessage');
+        const claimDailyBonusBtn = document.getElementById('claimDailyBonusBtn');
+        const spinCooldownMessage = document.getElementById('spinCooldownMessage');
         const spinBtn = document.getElementById('spinBtn');
         const withdrawBtn = document.getElementById('withdrawBtn');
         const historyBtn = document.getElementById('historyBtn');
         const shareAppBtn = document.getElementById('shareAppBtn');
-
         const adminAccessBtn = document.getElementById('adminAccessBtn');
         const backToAppBtn = document.getElementById('backToAppBtn');
         const adminWithdrawalsListDiv = document.getElementById('adminWithdrawalsListDiv');
         const adminUsersListDiv = document.getElementById('adminUsersListDiv');
-
+        const adminAllTransactionsListDiv = document.getElementById('adminAllTransactionsListDiv');
         const adminWithdrawalsTab = document.getElementById('adminWithdrawalsTab');
         const adminUsersTab = document.getElementById('adminUsersTab');
-        const adminSettingsTab = document.getElementById('adminSettingsTab');
-
+        const adminAllTransactionsTab = document.getElementById('adminAllTransactionsTab');
+        const adminAppLogsTab = document.getElementById('adminAppLogsTab');
         const adminWithdrawalsContent = document.getElementById('adminWithdrawalsContent');
         const adminUsersContent = document.getElementById('adminUsersContent');
-        const adminSettingsContent = document.getElementById('adminSettingsContent');
-        const spinWheelConfigContainer = document.getElementById('spinWheelConfigContainer');
-        const saveSpinWheelConfigBtn = document.getElementById('saveSpinWheelConfigBtn');
-
-
+        const adminAllTransactionsContent = document.getElementById('adminAllTransactionsContent');
+        const adminAppLogsContent = document.getElementById('adminAppLogsContent');
+        const adminAppLogsListDiv = document.getElementById('adminAppLogsListDiv');
+        const adminWheelSettingsListDiv = document.getElementById('adminWheelSettingsList');
+        const saveWheelSettingsBtn = document.getElementById('saveWheelSettingsBtn');
         const spinModal = document.getElementById('spinModal');
         const spinResultModal = document.getElementById('spinResultModal');
         const spinWinningsAmount = document.getElementById('spinWinningsAmount');
         const collectWinningsBtn = document.getElementById('collectWinningsBtn');
-
         const withdrawModal = document.getElementById('withdrawModal');
+        const withdrawModalCoinBalance = document.getElementById('withdrawModalCoinBalance');
+        const withdrawAmountInput = document.getElementById('withdrawAmountInput');
         const historyModal = document.getElementById('historyModal');
         const closeSpinModalBtn = document.getElementById('closeSpinModalBtn');
         const closeWithdrawModalBtn = document.getElementById('closeWithdrawModalBtn');
@@ -609,767 +968,1850 @@
         const submitWithdrawBtn = document.getElementById('submitWithdrawBtn');
         const upiIdInput = document.getElementById('upiIdInput');
         const wheel = document.getElementById('wheel');
-        const historyListDiv = document.getElementById('historyList');
+        const transactionHistoryListDiv = document.getElementById('transactionHistoryListDiv');
+        const shareAppModal = document.getElementById('shareAppModal');
+        const appDownloadLinkInput = document.getElementById('appDownloadLinkInput');
+        const copyDownloadLinkBtn = document.getElementById('copyDownloadLinkBtn');
+        const closeShareAppModalBtn = document.getElementById('closeShareAppModalBtn');
+        const userReferralCodeDisplay = document.getElementById('userReferralCodeDisplay');
+        const referralCodeInput = document.getElementById('referralCodeInput');
+        const submitReferralCodeBtn = document.getElementById('submitReferralCodeBtn');
+        const adminStatTotalUsers = document.getElementById('adminStatTotalUsers');
+        const adminStatTotalCoinsAwarded = document.getElementById('adminStatTotalCoinsAwarded');
+        const adminStatPendingWithdrawals = document.getElementById('adminStatPendingWithdrawals');
+        const adminStatTotalPaidCoins = document.getElementById('adminStatTotalPaidCoins');
+        const adminWithdrawalSearchInput = document.getElementById('adminWithdrawalSearchInput');
+        const adminWithdrawalStatusFilter = document.getElementById('adminWithdrawalStatusFilter');
+        const adminUserSearchInput = document.getElementById('adminUserSearchInput');
+        const adminAllTxSearchInput = document.getElementById('adminAllTxSearchInput');
+        const adminAllTxTypeFilter = document.getElementById('adminAllTxTypeFilter');
 
-        // New Modal Elements for Copy Link
-        const copyLinkModal = document.getElementById('copyLinkModal');
-        const appDownloadLinkDisplay = document.getElementById('appDownloadLinkDisplay');
-        const copyLinkBtnInModal = document.getElementById('copyLinkBtnInModal');
-        const closeCopyLinkModalBtn = document.getElementById('closeCopyLinkModalBtn');
+        function showLoading(show) {
+            if (loadingIndicator) {
+                loadingIndicator.style.display = show ? 'flex' : 'none';
+            }
+            document.body.style.cursor = show ? 'wait' : 'default';
+        }
 
+        async function logAppEvent(type, details) {
+            console.log(`EVENT: ${type}`, details);
+            try {
+                const logEntry = {
+                    type,
+                    details: details || {},
+                    userId: getCurrentUserDbKey() || 'SYSTEM',
+                    timestamp: fbServerTimestamp()
+                };
+                const logRef = ref(db, 'appLogs/' + Date.now() + "_" + Math.random().toString(36).substr(2,5));
+                await set(logRef, logEntry);
+            } catch (error) {
+                console.error("Error logging event to Firebase:", error);
+            }
+        }
 
-        let segments = [
-            { text: '10', color: '#FF6384' }, { text: '20', color: '#36A2EB' },
-            { text: '30', color: '#FFCE56' }, { text: '40', color: '#4BC0C0' },
-            { text: '50', color: '#9966FF' }, { text: '60', color: '#FF9F40' },
-            { text: '70', color: '#8AC249' }, { text: '80', color: '#EA5545' },
-            { text: '90', color: '#F46A9B' }, { text: '100', color: '#EF9B20' }
-        ];
-        let numSegments = segments.length;
-        let anglePerSegment = 360 / numSegments;
+        function listenForAppLogs() {
+            const logsRef = query(ref(db, 'appLogs'), orderByChild('timestamp'), limitToLast(50));
+            onValue(logsRef, (snapshot) => {
+                appLogs = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(childSnapshot => {
+                        appLogs.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                    });
+                    appLogs.reverse();
+                }
+                if (isAdminView && adminAppLogsListDiv) renderAdminAppLogs();
+            }, (error) => {
+                console.error("Error listening to app logs:", error);
+                logAppEvent("error", { function: "listenForAppLogs", message: error.message });
+            });
+        }
 
-        let popUpAdScriptLoaded = false;
-        let bannerAd2ScriptLoaded = false;
+        function listenForAllSystemTransactions() {
+            const transactionsRef = query(ref(db, 'allSystemTransactions'), orderByChild('timestamp'), limitToLast(100));
+            onValue(transactionsRef, (snapshot) => {
+                allSystemTransactionsCache = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(childSnapshot => {
+                        allSystemTransactionsCache.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                    });
+                    allSystemTransactionsCache.reverse();
+                }
+                if (isAdminView && adminAllTransactionsContent && adminAllTransactionsContent.style.display === 'block') {
+                    renderAdminAllTransactions();
+                }
+            }, (error) => {
+                console.error("Error listening to all system transactions:", error);
+                logAppEvent("error", { function: "listenForAllSystemTransactions", message: error.message });
+            });
+        }
 
         function getCurrentUserDbKey() {
             if (currentUserUid) return currentUserUid;
             if (currentUserPhoneNumber) return currentUserPhoneNumber;
             return null;
         }
-
         function getCurrentUserData() {
             const key = getCurrentUserDbKey();
             return key && usersData[key] ? usersData[key] : null;
         }
 
-        async function loadDataFromFirebase() {
-            console.log("Attempting to load data from Firebase...");
+        async function loadAppSettings() {
             try {
-                const usersSnapshot = await get(ref(db, 'users'));
-                if (usersSnapshot.exists()) {
-                    usersData = usersSnapshot.val();
-                    Object.keys(usersData).forEach(uid => {
-                        if (usersData[uid].isBanned === undefined) usersData[uid].isBanned = false;
-                    });
-                } else { usersData = {};}
-
-                const withdrawalsSnapshot = await get(ref(db, 'withdrawals'));
-                if (withdrawalsSnapshot.exists()) {
-                    allWithdrawals = withdrawalsSnapshot.val();
-                } else { allWithdrawals = {};}
-
-                const wheelConfigSnapshot = await get(ref(db, 'appConfig/spinWheelSegments'));
-                if (wheelConfigSnapshot.exists()) {
-                    const firebaseSegments = wheelConfigSnapshot.val();
-                    if (Array.isArray(firebaseSegments) && firebaseSegments.length > 0) {
-                        segments = firebaseSegments;
-                        numSegments = segments.length;
-                        anglePerSegment = 360 / numSegments;
-                    }
+                const snapshot = await get(ref(db, 'appConfig/settings'));
+                if (snapshot.exists()) {
+                    const fetchedSettings = snapshot.val();
+                    appSettings.dailyBonusAmount = Number(fetchedSettings.dailyBonusAmount) || 50;
+                    appSettings.referralBonusAmount = Number(fetchedSettings.referralBonusAmount) || 50;
+                    appSettings.minWithdrawal = Number(fetchedSettings.minWithdrawal) || 100;
+                    appSettings.maxWithdrawal = Number(fetchedSettings.maxWithdrawal) || 5000;
+                    appSettings.shareLink = fetchedSettings.shareLink || "https://www.mediafire.com/file/4cxvbs4uxeza0b1/D-earning.apk/file";
+                    appSettings.contactSupportLink = fetchedSettings.contactSupportLink || "https://t.me/YourTelegramUsername";
+                    appSettings.adCodeAfterSpin = fetchedSettings.adCodeAfterSpin || "<!-- Default Ad Code Placeholder -->";
+                } else {
+                    await set(ref(db, 'appConfig/settings'), appSettings);
                 }
             } catch (error) {
+                console.error("Error loading app settings:", error);
+                logAppEvent("error", { function: "loadAppSettings", message: error.message });
+            }
+            if(dailyBonusMessage) updateDailyBonusDisplay(getCurrentUserData());
+            if(referralBonusDisplay) referralBonusDisplay.textContent = appSettings.referralBonusAmount;
+            if(minWithdrawDisplay) minWithdrawDisplay.textContent = appSettings.minWithdrawal;
+            if(maxWithdrawDisplay) maxWithdrawDisplay.textContent = appSettings.maxWithdrawal;
+            if(appDownloadLinkInput) appDownloadLinkInput.value = appSettings.shareLink;
+        }
+
+        async function loadDataFromFirebase() {
+            showLoading(true);
+            console.log("Loading data from Firebase...");
+            try {
+                await loadAppSettings();
+
+                const usersSnapshot = await get(ref(db, 'users'));
+                usersData = usersSnapshot.exists() ? usersSnapshot.val() : {};
+
+                const withdrawalsRef = ref(db, 'withdrawals');
+                onValue(withdrawalsRef, (snapshot) => {
+                    allWithdrawals = snapshot.exists() ? snapshot.val() : {};
+                    if (historyModal && historyModal.style.display === 'flex') {
+                        const userDbKey = getCurrentUserDbKey();
+                        if (userDbKey) renderUserTransactionHistory(userDbKey);
+                    }
+                    if (isAdminView) {
+                        renderAdminWithdrawals();
+                        updateAdminStats();
+                    }
+                });
+
+                await loadWheelConfiguration();
+                listenForAppLogs();
+                listenForAllSystemTransactions();
+            } catch (error) {
                 console.error("Error loading data from Firebase:", error);
-                alert("Could not connect to the database. Some features might not work.");
+                logAppEvent("error", { function: "loadDataFromFirebase", message: error.message });
                 usersData = {}; allWithdrawals = {};
+            } finally {
+                showLoading(false);
             }
         }
 
-        function loadBannerAd2() {
-            if (!bannerAd2ScriptLoaded && document.getElementById('bannerAdContainer2').style.display !== 'none') {
-                const adOptions = {'key' : '1a0cc19eb7e8ce411b4935f94fb33046', 'format' : 'iframe', 'height' : 50, 'width' : 320, 'params' : {}};
-                const scriptTag = document.createElement('script');
-                scriptTag.type = 'text/javascript';
-                scriptTag.src = '//www.highperformanceformat.com/1a0cc19eb7e8ce411b4935f94fb33046/invoke.js';
-                const adContainer = document.getElementById('bannerAdContainer2');
-                window.atOptions = adOptions;
-                adContainer.innerHTML = '';
-                adContainer.appendChild(scriptTag);
-                bannerAd2ScriptLoaded = true;
+        async function loadWheelConfiguration() {
+            try {
+                const snapshot = await get(ref(db, 'appConfig/wheelSegments'));
+                if (snapshot.exists()) {
+                    const fetchedSegments = snapshot.val();
+                    if (Array.isArray(fetchedSegments) && fetchedSegments.length > 0) {
+                        const isValid = fetchedSegments.every(s => typeof s.text !== 'undefined' && typeof s.color !== 'undefined');
+                        if (isValid) activeWheelSegments = fetchedSegments;
+                        else activeWheelSegments = [...defaultWheelSegments.map(s => ({...s}))];
+                    } else activeWheelSegments = [...defaultWheelSegments.map(s => ({...s}))];
+                } else activeWheelSegments = [...defaultWheelSegments.map(s => ({...s}))];
+            } catch (error) {
+                console.error("Error loading wheel configuration:", error);
+                logAppEvent("error", { function: "loadWheelConfiguration", message: error.message });
+                activeWheelSegments = [...defaultWheelSegments.map(s => ({...s}))];
             }
+            numSegments = activeWheelSegments.length;
+            anglePerSegment = numSegments > 0 ? 360 / numSegments : 360;
         }
 
-        function loadPopUpAd() {
-            if (!popUpAdScriptLoaded) {
-                const scriptTag = document.createElement('script');
-                scriptTag.type = 'text/javascript';
-                scriptTag.src = '//pl26601942.profitableratecpm.com/b6/72/39/b67239eda4e2ea035e63bcc1580654ed.js';
-                document.body.appendChild(scriptTag);
-                popUpAdScriptLoaded = true;
-            }
-        }
+        function loadBannerAd2() { /* Placeholder */ }
+        function loadPopUpAd() { /* Placeholder */ }
 
-        function showAuthScreen() {
-            authScreen.style.display = 'block';
-            appContainer.style.display = 'none';
-            adminPanel.style.display = 'none';
-            if (bannerAdContainer2) { bannerAdContainer2.style.display = 'block'; loadBannerAd2(); }
-            adminAccessBtn.style.display = 'block';
+        function showAuthScreen(message = null, isError = true) {
+            if (authScreen) authScreen.style.display = 'block';
+            if (appContainer) appContainer.style.display = 'none';
+            if (adminPanel) adminPanel.style.display = 'none';
+            if (bannerAdContainer2) { bannerAdContainer2.style.display = 'block'; }
+            if (adminAccessBtn) adminAccessBtn.style.display = 'block';
+
             currentUser = null; currentUserUid = null; currentUserPhoneNumber = null;
-            sessionStorage.removeItem('spinWheelCurrentUser');
-            loginForm.style.display = 'block'; registerForm.style.display = 'none';
-            showLoginTabBtn.classList.add('active'); showRegisterTabBtn.classList.remove('active');
-            updateCoinDisplayForCurrentUser(true);
+            if (userTransactionsListener) userTransactionsListener();
+
+            if (message && authMessageDiv) {
+                authMessageDiv.textContent = message; authMessageDiv.style.display = 'block';
+                authMessageDiv.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
+                authMessageDiv.style.borderColor = isError ? '#f5c6cb' : '#c3e6cb';
+                authMessageDiv.style.color = isError ? '#721c24' : '#155724';
+            } else if (authMessageDiv) {
+                authMessageDiv.style.display = 'none';
+            }
+
+            if (loginFormsContainer) loginFormsContainer.style.display = 'block';
+            if (registerFormsContainer) registerFormsContainer.style.display = 'none';
+            if (showLoginFormsBtn) showLoginFormsBtn.classList.add('active');
+            if (showRegisterFormsBtn) showRegisterFormsBtn.classList.remove('active');
+            if (loginEmailForm) loginEmailForm.style.display = 'block';
+            if (loginPhoneForm) loginPhoneForm.style.display = 'none';
+            if (showEmailLoginTabBtn) showEmailLoginTabBtn.classList.add('active');
+            if (showPhoneLoginTabBtn) showPhoneLoginTabBtn.classList.remove('active');
+            updateUIDisplayForCurrentUser(true);
         }
 
         function showAppScreen() {
-            authScreen.style.display = 'none';
-            appContainer.style.display = 'block';
-            adminPanel.style.display = 'none';
-            if (bannerAdContainer2) { bannerAdContainer2.style.display = 'block'; loadBannerAd2(); }
-            adminAccessBtn.style.display = 'block';
+            if (authMessageDiv) authMessageDiv.style.display = 'none';
+            if (authScreen) authScreen.style.display = 'none';
+            if (appContainer) appContainer.style.display = 'block';
+            if (adminPanel) adminPanel.style.display = 'none';
+            if (bannerAdContainer2) { bannerAdContainer2.style.display = 'block'; }
+            if (adminAccessBtn) adminAccessBtn.style.display = 'block';
 
             const userData = getCurrentUserData();
-            if (userData && userData.name) {
-                welcomeMessage.textContent = `Welcome, ${userData.name.split(' ')[0]}!`;
-            } else {
-                welcomeMessage.textContent = "Spin & Win Rewards";
-            }
-            updateCoinDisplayForCurrentUser(true);
-            loadPopUpAd();
+            let nameToDisplay = "User";
+            if (userData && userData.name) nameToDisplay = userData.name.split(' ')[0];
+            else if (currentUser && currentUser.displayName) nameToDisplay = currentUser.displayName.split(' ')[0];
+            else if (currentUser && currentUser.email) nameToDisplay = currentUser.email.split('@')[0];
+
+            if(welcomeMessage) welcomeMessage.textContent = `Welcome, ${nameToDisplay}!`;
+            updateUIDisplayForCurrentUser();
+            attachUserTransactionListener();
         }
 
         function showAdminPanel() {
             isAdminView = true;
-            authScreen.style.display = 'none';
-            appContainer.style.display = 'none';
-            adminPanel.style.display = 'block';
+            if (authMessageDiv) authMessageDiv.style.display = 'none';
+            if (authScreen) authScreen.style.display = 'none';
+            if (appContainer) appContainer.style.display = 'none';
+            if (adminPanel) adminPanel.style.display = 'block';
             if (bannerAdContainer2) bannerAdContainer2.style.display = 'none';
-            adminAccessBtn.style.display = 'none';
+            if (adminAccessBtn) adminAccessBtn.style.display = 'none';
+            renderAdminPanelData();
 
-            adminWithdrawalsContent.style.display = 'block';
-            adminUsersContent.style.display = 'none';
-            adminSettingsContent.style.display = 'none';
-            adminWithdrawalsTab.classList.add('active');
-            adminUsersTab.classList.remove('active');
-            adminSettingsTab.classList.remove('active');
+            if (adminWithdrawalsContent) adminWithdrawalsContent.style.display = 'block';
+            if (adminUsersContent) adminUsersContent.style.display = 'none';
+            if (adminAllTransactionsContent) adminAllTransactionsContent.style.display = 'none';
+            if (adminAppSettingsContent) adminAppSettingsContent.style.display = 'none';
+            if (adminAppLogsContent) adminAppLogsContent.style.display = 'none';
 
-            renderAdminWithdrawals();
-            renderAdminUsersList();
-            renderAdminAppSettings();
+            if (adminWithdrawalsTab) adminWithdrawalsTab.classList.add('active');
+            if (adminUsersTab) adminUsersTab.classList.remove('active');
+            if (adminAllTransactionsTab) adminAllTransactionsTab.classList.remove('active');
+            if (adminAppSettingsTab) adminAppSettingsTab.classList.remove('active');
+            if (adminAppLogsTab) adminAppLogsTab.classList.remove('active');
         }
 
-        showLoginTabBtn.addEventListener('click', () => {
-            loginForm.style.display = 'block'; registerForm.style.display = 'none';
-            showLoginTabBtn.classList.add('active'); showRegisterTabBtn.classList.remove('active');
+        if (showLoginFormsBtn) showLoginFormsBtn.addEventListener('click', () => {
+            if (loginFormsContainer) loginFormsContainer.style.display = 'block';
+            if (registerFormsContainer) registerFormsContainer.style.display = 'none';
+            showLoginFormsBtn.classList.add('active');
+            if (showRegisterFormsBtn) showRegisterFormsBtn.classList.remove('active');
         });
-        showRegisterTabBtn.addEventListener('click', () => {
-            loginForm.style.display = 'none'; registerForm.style.display = 'block';
-            showRegisterTabBtn.classList.add('active'); showLoginTabBtn.classList.remove('active');
+        if (showRegisterFormsBtn) showRegisterFormsBtn.addEventListener('click', () => {
+            if (loginFormsContainer) loginFormsContainer.style.display = 'none';
+            if (registerFormsContainer) registerFormsContainer.style.display = 'block';
+            showRegisterFormsBtn.classList.add('active');
+            if (showLoginFormsBtn) showLoginFormsBtn.classList.remove('active');
+            if (registerEmailPasswordForm) registerEmailPasswordForm.style.display = 'block';
+            if (registerPhoneForm) registerPhoneForm.style.display = 'none';
+            if (showEmailRegisterTabBtn) showEmailRegisterTabBtn.classList.add('active');
+            if (showPhoneRegisterTabBtn) showPhoneRegisterTabBtn.classList.remove('active');
+        });
+        if (showEmailLoginTabBtn) showEmailLoginTabBtn.addEventListener('click', () => {
+            if (loginEmailForm) loginEmailForm.style.display = 'block';
+            if (loginPhoneForm) loginPhoneForm.style.display = 'none';
+            showEmailLoginTabBtn.classList.add('active');
+            if (showPhoneLoginTabBtn) showPhoneLoginTabBtn.classList.remove('active');
+        });
+        if (showPhoneLoginTabBtn) showPhoneLoginTabBtn.addEventListener('click', () => {
+            if (loginEmailForm) loginEmailForm.style.display = 'none';
+            if (loginPhoneForm) loginPhoneForm.style.display = 'block';
+            showPhoneLoginTabBtn.classList.add('active');
+            if (showEmailLoginTabBtn) showEmailLoginTabBtn.classList.remove('active');
+        });
+        if (showEmailRegisterTabBtn) showEmailRegisterTabBtn.addEventListener('click', () => {
+            if (registerEmailPasswordForm) registerEmailPasswordForm.style.display = 'block';
+            if (registerPhoneForm) registerPhoneForm.style.display = 'none';
+            showEmailRegisterTabBtn.classList.add('active');
+            if (showPhoneRegisterTabBtn) showPhoneRegisterTabBtn.classList.remove('active');
+        });
+        if (showPhoneRegisterTabBtn) showPhoneRegisterTabBtn.addEventListener('click', () => {
+            if (registerEmailPasswordForm) registerEmailPasswordForm.style.display = 'none';
+            if (registerPhoneForm) registerPhoneForm.style.display = 'block';
+            showPhoneRegisterTabBtn.classList.add('active');
+            if (showEmailRegisterTabBtn) showEmailRegisterTabBtn.classList.remove('active');
         });
 
-        registerBtn.addEventListener('click', async () => {
-            const name = registerNameInput.value.trim();
-            const phone = registerPhoneNumberInput.value.trim();
-            if (!name || !phone) { alert('Please enter both name and phone number.'); return; }
-            if(!/^\d{10}$/.test(phone)){ alert('Please enter a valid 10-digit phone number.'); return; }
-            if (usersData[phone]) { alert('This phone number is already registered. Please login.'); return; }
+        const nameValidationRegex = /^[a-zA-Z0-9\s]+$/;
 
-            const newUser = {
-                name: name, phoneNumber: phone, coins: INITIAL_COINS,
-                password: name, registeredAt: fbServerTimestamp(),
-                authProvider: "phone", isBanned: false
+        function generateReferralCode(userId) {
+            const idPart = String(userId || Math.random().toString(36).substring(2,8)).substring(0, 6).toUpperCase();
+            return `REF${idPart}`;
+        }
+
+        async function createNewUserProfile(userId, name, email, authProvider, phoneNumber = null, password = null) {
+            const userRef = ref(db, 'users/' + userId);
+            const referralCode = generateReferralCode(userId);
+            const newUserProfile = {
+                name: name || `User-${String(userId).slice(0,5)}`,
+                email: email,
+                coins: INITIAL_COINS,
+                phoneNumber: phoneNumber,
+                password: password,
+                registeredAt: fbServerTimestamp(),
+                authProvider: authProvider,
+                isBanned: false,
+                lastSpinTime: 0,
+                lastLoginBonusTime: 0,
+                referralCode: referralCode,
+                hasUsedReferralCode: false,
+                referredBy: null,
             };
+            await set(userRef, newUserProfile);
+            usersData[userId] = { ...newUserProfile, registeredAt: Date.now(), referralCode, hasUsedReferralCode: false, referredBy: null };
+
+            await set(ref(db, `referralCodes/${referralCode}`), userId);
+            logAppEvent("new_user_profile_created", { userId: userId, provider: authProvider, referralCode });
+            return usersData[userId];
+        }
+
+        if (registerEmailBtn) registerEmailBtn.addEventListener('click', async () => {
+            const name = registerNameEmailInput.value.trim();
+            const email = registerEmailInput.value.trim();
+            const password = registerPasswordInput.value.trim();
+
+            if (!name || !email || !password) { alert('Please fill: Name, Email, Password.'); return; }
+            if (!nameValidationRegex.test(name)) { alert('Name can only contain letters, numbers, and spaces.'); return; }
+            if (password.length < 6) { alert('Password min 6 characters.'); return; }
+
+            showLoading(true);
             try {
-                await set(ref(db, 'users/' + phone), newUser);
-                usersData[phone] = { ...newUser, registeredAt: Date.now(), authProvider: "phone", isBanned: false };
-                currentUserPhoneNumber = phone;
-                sessionStorage.setItem('spinWheelCurrentUser', phone);
-                currentUser = null; currentUserUid = null;
-                registerNameInput.value = ''; registerPhoneNumberInput.value = '';
-                isAdminView = false; showAppScreen();
+                registerEmailBtn.disabled = true; registerEmailBtn.textContent = "Registering...";
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                const user = userCredential.user;
+                await createNewUserProfile(user.uid, name, user.email, "email", null, null);
+                registerNameEmailInput.value = ''; registerEmailInput.value = ''; registerPasswordInput.value = '';
             } catch (error) {
-                console.error("Error registering user:", error);
-                alert("Registration failed. Please try again later.");
+                console.error("Email Reg Error:", error);
+                logAppEvent("error", { function: "registerEmail", message: error.message, email: email });
+                alert(error.code === 'auth/email-already-in-use' ? 'Email already in use.' : `Reg failed: ${error.message}`);
+            } finally {
+                if(registerEmailBtn) { registerEmailBtn.disabled = false; registerEmailBtn.textContent = "Register"; }
+                showLoading(false);
             }
         });
 
-        loginBtn.addEventListener('click', () => {
-            const phone = loginPhoneNumberInput.value.trim();
-            const nameAsPassword = loginNameInput.value.trim();
-            if (!phone || !nameAsPassword) { alert('Please enter phone number and your name (as password).'); return; }
+        if (registerPhoneBtn) registerPhoneBtn.addEventListener('click', async () => {
+            const name = registerNamePhoneInput.value.trim();
+            const phone = registerPhoneNumberPhoneInput.value.trim();
+            const password = registerPhonePasswordInput.value.trim();
 
+            if (!name || !phone || !password) { alert('Please fill: Name, Phone, and Password.'); return; }
+            if (!nameValidationRegex.test(name)) { alert('Name can only contain letters, numbers, and spaces.'); return; }
+            if (!/^\d{10}$/.test(phone)) { alert('Valid 10-digit phone number.'); return; }
+            if (password.length < 6) { alert('Password min 6 characters.'); return; }
+
+            showLoading(true);
+            if (usersData[phone]) {
+                alert('Phone number already registered. Please login.');
+                showLoading(false); return;
+            }
+            const existingUserSnap = await get(ref(db, 'users/' + phone));
+            if (existingUserSnap.exists()) {
+                alert('Phone number already registered. Please login.');
+                usersData[phone] = existingUserSnap.val();
+                showLoading(false); return;
+            }
+
+            try {
+                registerPhoneBtn.disabled = true; registerPhoneBtn.textContent = "Registering...";
+                await createNewUserProfile(phone, name, null, "phone", phone, password);
+
+                currentUserPhoneNumber = phone; localStorage.setItem('spinWheelCurrentUser', phone);
+                currentUser = null; currentUserUid = null;
+                registerNamePhoneInput.value = ''; registerPhoneNumberPhoneInput.value = ''; registerPhonePasswordInput.value = '';
+                showAppScreen();
+            } catch (error) {
+                console.error("Phone Reg Error:", error);
+                logAppEvent("error", { function: "registerPhone", message: error.message, phone: phone });
+                alert("Registration failed.");
+            } finally {
+                if(registerPhoneBtn) {registerPhoneBtn.disabled = false; registerPhoneBtn.textContent = "Register"; }
+                showLoading(false);
+            }
+        });
+
+        if (loginEmailBtn) loginEmailBtn.addEventListener('click', async () => {
+            const email = loginEmailInput.value.trim(); const password = loginPasswordInput.value.trim();
+            if (!email || !password) { alert('Enter email and password.'); return; }
+            showLoading(true);
+            try {
+                loginEmailBtn.disabled = true; loginEmailBtn.textContent = "Logging in...";
+                await signInWithEmailAndPassword(auth, email, password);
+                logAppEvent("login_attempt", { method: "email", email: email, success: true });
+                loginEmailInput.value = ''; loginPasswordInput.value = '';
+            } catch (error) {
+                console.error("Email Login Error:", error);
+                logAppEvent("login_attempt", { method: "email", email: email, success: false, error: error.code });
+                const msg = (error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password' || error.code === 'auth/invalid-credential') ? 'Invalid email or password.' : `Login failed: ${error.message}`;
+                showAuthScreen(msg);
+            } finally {
+                if(loginEmailBtn) { loginEmailBtn.disabled = false; loginEmailBtn.textContent = "Login"; }
+                showLoading(false);
+            }
+        });
+
+        if (loginPhoneBtn) loginPhoneBtn.addEventListener('click', async () => {
+            const phone = loginPhoneNumberPhoneInput.value.trim();
+            const passwordAttempt = loginPhonePasswordInput.value.trim();
+
+            if (!phone || !passwordAttempt) { alert('Enter phone and password.'); return; }
+
+            showLoading(true);
+            const userSnapshot = await get(ref(db, 'users/' + phone));
+            if (!userSnapshot.exists()) {
+                showAuthScreen('Phone not registered. Please register.');
+                logAppEvent("login_attempt", { method: "phone", phone: phone, success: false, reason: "not_registered_on_db_check" });
+                showLoading(false); return;
+            }
+
+            usersData[phone] = userSnapshot.val();
             const user = usersData[phone];
-            if (!user) { alert('Phone number not registered. Please register first.'); return; }
-            if (user.password !== nameAsPassword) { alert('Incorrect name/password for this phone number.'); return; }
-            if (user.isBanned) { alert('Your account has been suspended. Please contact support.'); return; }
 
-            currentUserPhoneNumber = phone;
-            sessionStorage.setItem('spinWheelCurrentUser', phone);
+            if (user.isBanned) {
+                showAuthScreen(`Account for ${phone} is banned.`);
+                localStorage.removeItem('spinWheelCurrentUser');
+                logAppEvent("login_attempt", { method: "phone", phone: phone, success: false, reason: "banned" });
+                showLoading(false); return;
+            }
+
+            if (user.password !== passwordAttempt) {
+                showAuthScreen('Incorrect password for this phone.');
+                logAppEvent("login_attempt", { method: "phone", phone: phone, success: false, reason: "wrong_password" });
+                showLoading(false); return;
+            }
+
+            currentUserPhoneNumber = phone; localStorage.setItem('spinWheelCurrentUser', phone);
             currentUser = null; currentUserUid = null;
-
             if (!user.authProvider) {
                 update(ref(db, 'users/' + phone), { authProvider: "phone" }).catch(console.error);
                 usersData[phone].authProvider = "phone";
             }
-            if (user.isBanned === undefined) {
-                update(ref(db, 'users/' + phone), { isBanned: false }).catch(console.error);
-                usersData[phone].isBanned = false;
-            }
-
-            loginPhoneNumberInput.value = ''; loginNameInput.value = '';
-            isAdminView = false; showAppScreen();
+            logAppEvent("login_attempt", { method: "phone", phone: phone, success: true });
+            loginPhoneNumberPhoneInput.value = ''; loginPhonePasswordInput.value = '';
+            showAppScreen();
+            showLoading(false);
         });
 
-        async function signInWithGoogle() {
+        if (googleSignInBtn) googleSignInBtn.addEventListener('click', async () => {
             const provider = new GoogleAuthProvider();
+            showLoading(true);
             try {
+                googleSignInBtn.disabled = true; googleSignInBtn.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G" style="width:18px;height:18px;margin-right:10px;"> Signing in...';
                 await signInWithPopup(auth, provider);
             } catch (error) {
                 console.error("Google Sign-In Error:", error);
-                if (error.code === 'auth/popup-closed-by-user') { /* Do nothing */ }
-                else { alert("Google Sign-In failed. Error: " + error.message); }
-            }
-        }
-        googleSignInBtn.addEventListener('click', signInWithGoogle);
-
-        logoutBtn.addEventListener('click', async () => {
-            if (currentUserUid) {
-                try { await fbSignOut(auth); }
-                catch (error) { console.error("Error signing out from Firebase Auth:", error); alert("Logout failed.");}
-            } else if (currentUserPhoneNumber) {
-                sessionStorage.removeItem('spinWheelCurrentUser');
-                currentUserPhoneNumber = null;
-                 if (!auth.currentUser) showAuthScreen();
-            } else { showAuthScreen(); }
-        });
-
-        function updateCoinDisplayForCurrentUser(isInitialLoad = false) {
-            const userData = getCurrentUserData();
-            if (userData) {
-                const userCoins = userData.coins;
-                const rupees = (userCoins / 100).toFixed(2);
-                coinDisplay.innerHTML = `Coins: ${userCoins} <span style="font-size:0.7em;">(₹${rupees})</span>`;
-                if (!isInitialLoad) {
-                    coinDisplay.classList.add('coin-update-animation');
-                    setTimeout(() => coinDisplay.classList.remove('coin-update-animation'), 600);
+                logAppEvent("login_attempt", { method: "google", success: false, error: error.code });
+                let msg = "Google Sign-In failed.";
+                if (error.code === 'auth/popup-closed-by-user') msg = "Sign-in popup closed.";
+                else if (error.code === 'auth/account-exists-with-different-credential') msg = "Account exists with different credential.";
+                else msg = `Google Sign-In Error: ${error.message}`;
+                showAuthScreen(msg);
+            } finally {
+                if(googleSignInBtn) {
+                    googleSignInBtn.disabled = false;
+                    googleSignInBtn.innerHTML = '<img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="G" style="width:18px;height:18px;margin-right:10px;"> Sign in with Google';
                 }
-                if(withdrawBtn) withdrawBtn.disabled = userCoins < FIXED_WITHDRAWAL_AMOUNT;
-                if(spinBtn) spinBtn.disabled = false;
-            } else {
-                coinDisplay.textContent = 'Coins: N/A';
-                if(withdrawBtn) withdrawBtn.disabled = true;
-                if(spinBtn) spinBtn.disabled = true;
+                showLoading(false);
+            }
+        });
+
+        if (forgotPasswordLink) forgotPasswordLink.addEventListener('click', async (e) => {
+            e.preventDefault();
+            const email = loginEmailInput.value.trim();
+            if (!email) {
+                alert("Please enter your email address in the email field first."); return;
+            }
+            showLoading(true);
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert("Password reset email sent! Check your inbox (and spam folder).");
+                logAppEvent("password_reset_request", { email: email, success: true });
+            } catch (error) {
+                console.error("Password Reset Error:", error);
+                logAppEvent("password_reset_request", { email: email, success: false, error: error.code });
+                alert(`Failed to send password reset email: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        if (logoutBtn) logoutBtn.addEventListener('click', async () => {
+            showLoading(true);
+            try {
+                const userDbKey = getCurrentUserDbKey();
+                if (auth.currentUser) await fbSignOut(auth);
+                localStorage.removeItem('spinWheelCurrentUser');
+                logAppEvent("logout", { userId: userDbKey });
+                currentUser = null; currentUserUid = null; currentUserPhoneNumber = null;
+                if (userTransactionsListener) userTransactionsListener();
+                showAuthScreen("You have been logged out.", false);
+            } catch (error) {
+                console.error("Logout Error:", error);
+                logAppEvent("error", { function: "logout", message: error.message });
+                alert("Logout failed.");
+                showAuthScreen();
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        function updateCoinDisplay(userData, isInitialLoad = false) {
+            if (coinDisplay) {
+                if (userData) {
+                    const userCoins = userData.coins || 0;
+                    const rupees = (userCoins / 100).toFixed(2);
+                    coinDisplay.innerHTML = `Coins: ${userCoins} <span style="font-size:0.7em;">(₹${rupees})</span>`;
+                    if (!isInitialLoad) { coinDisplay.classList.add('coin-update-animation'); setTimeout(() => coinDisplay.classList.remove('coin-update-animation'), 600); }
+                } else {
+                    coinDisplay.textContent = 'Coins: N/A';
+                }
             }
         }
 
-        spinBtn.addEventListener('click', () => {
-            if (!getCurrentUserDbKey()) { alert("Please login to spin."); return; }
+        function updateUIDisplayForCurrentUser(isInitialLoad = false) {
             const userData = getCurrentUserData();
-            if (userData && userData.isBanned) {
-                alert("Your account is suspended. You cannot perform this action."); return;
+            updateCoinDisplay(userData, isInitialLoad);
+            updateDailyBonusDisplay(userData);
+            updateSpinCooldownDisplay(userData);
+
+            if (withdrawBtn && userData) {
+                 withdrawBtn.disabled = (userData.coins || 0) < appSettings.minWithdrawal || (userData.isBanned || false);
+            } else if(withdrawBtn) {
+                withdrawBtn.disabled = true;
             }
-            spinModal.style.display = 'flex';
-        });
 
-        withdrawBtn.addEventListener('click', () => {
-            const userData = getCurrentUserData();
-            if (!userData) { alert("Please login first."); return; }
-            if (userData.isBanned) {
-                alert("Your account is suspended. You cannot perform this action."); return;
+            if (spinBtn && userData && userData.isBanned) spinBtn.disabled = true;
+            else if (spinBtn && !userData) spinBtn.disabled = true;
+
+            if (!userData && claimDailyBonusBtn) claimDailyBonusBtn.style.display = 'none';
+
+            if (userData && userReferralCodeDisplay) {
+                userReferralCodeDisplay.textContent = userData.referralCode || "N/A";
+            } else if (userReferralCodeDisplay) {
+                 userReferralCodeDisplay.textContent = "Loading...";
             }
-            if (userData.coins < FIXED_WITHDRAWAL_AMOUNT) { alert(`You need at least ${FIXED_WITHDRAWAL_AMOUNT} coins to withdraw.`); return; }
-            withdrawModal.style.display = 'flex';
-        });
 
-        historyBtn.addEventListener('click', showWithdrawalHistoryForUser);
+            if (userData && referralCodeInput && submitReferralCodeBtn) {
+                if (userData.hasUsedReferralCode) {
+                    referralCodeInput.value = userData.referredBy ? `Used: ${userData.referredBy}` : "Referral code already used";
+                    referralCodeInput.disabled = true;
+                    submitReferralCodeBtn.disabled = true;
+                    submitReferralCodeBtn.textContent = "Bonus Claimed";
+                } else {
+                    referralCodeInput.disabled = false;
+                    submitReferralCodeBtn.disabled = false;
+                    submitReferralCodeBtn.textContent = "Submit Code";
+                }
+            }
+            if(referralBonusDisplay) referralBonusDisplay.textContent = appSettings.referralBonusAmount;
+            if(minWithdrawDisplay) minWithdrawDisplay.textContent = appSettings.minWithdrawal;
+            if(maxWithdrawDisplay) maxWithdrawDisplay.textContent = appSettings.maxWithdrawal;
+            if(appDownloadLinkInput) appDownloadLinkInput.value = appSettings.shareLink;
+        }
 
-        closeSpinModalBtn.addEventListener('click', () => spinModal.style.display = 'none');
-        collectWinningsBtn.addEventListener('click', () => spinResultModal.style.display = 'none');
-        closeWithdrawModalBtn.addEventListener('click', () => withdrawModal.style.display = 'none');
-        closeHistoryModalBtn.addEventListener('click', () => historyModal.style.display = 'none');
-        closeCopyLinkModalBtn.addEventListener('click', () => copyLinkModal.style.display = 'none');
+        function updateDailyBonusDisplay(userData) {
+            if (!userData || !claimDailyBonusBtn || !dailyBonusMessage) return;
 
+            const now = Date.now();
+            const lastBonusTime = userData.lastLoginBonusTime || 0;
+            const lastBonusDate = new Date(lastBonusTime).setUTCHours(0,0,0,0);
+            const currentDate = new Date(now).setUTCHours(0,0,0,0);
 
-        submitWithdrawBtn.addEventListener('click', async () => {
+            if (currentDate > lastBonusDate) {
+                dailyBonusMessage.textContent = `🎁 Daily bonus of ${appSettings.dailyBonusAmount} coins available!`;
+                claimDailyBonusBtn.style.display = 'block';
+                claimDailyBonusBtn.disabled = false;
+            } else {
+                dailyBonusMessage.textContent = "Daily bonus claimed for today.";
+                claimDailyBonusBtn.style.display = 'none';
+            }
+        }
+        if (claimDailyBonusBtn) claimDailyBonusBtn.addEventListener('click', async () => {
             const userDbKey = getCurrentUserDbKey();
             const userData = getCurrentUserData();
-            if (!userDbKey || !userData) { alert("Error: Not logged in."); return; }
-            if (userData.isBanned) { alert("Your account is suspended. Withdrawal not allowed."); return; }
+            if (!userDbKey || !userData) return;
 
-            const amountToWithdraw = FIXED_WITHDRAWAL_AMOUNT;
-            const upi = upiIdInput.value.trim();
-            if (userData.coins < amountToWithdraw) { alert(`Insufficient coins. Minimum ${amountToWithdraw} required.`); return; }
-            if (!upi || !/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upi)) { alert('Please enter a valid UPI ID.'); return; }
-
-            const withdrawalId = "wd_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
-            const newWithdrawal = {
-                id: withdrawalId, userId: userDbKey,
-                userPhoneNumber: userData.phoneNumber || (currentUserPhoneNumber || 'N/A (Google User)'),
-                userName: userData.name || userData.email || 'Unknown User',
-                amount: amountToWithdraw, upiId: upi, status: 'pending', timestamp: fbServerTimestamp()
-            };
-            const newCoinsForUser = userData.coins - amountToWithdraw;
-
+            claimDailyBonusBtn.disabled = true;
             try {
-                await set(ref(db, 'withdrawals/' + withdrawalId), newWithdrawal);
-                await update(ref(db, 'users/' + userDbKey), { coins: newCoinsForUser });
-                if (!allWithdrawals) allWithdrawals = {};
-                allWithdrawals[withdrawalId] = { ...newWithdrawal, timestamp: Date.now() };
-                usersData[userDbKey].coins = newCoinsForUser;
-                updateCoinDisplayForCurrentUser();
-                withdrawModal.style.display = 'none'; upiIdInput.value = '';
-                alert(`Withdrawal request for ${amountToWithdraw} coins submitted!`);
+                const newCoins = (userData.coins || 0) + appSettings.dailyBonusAmount;
+                const updates = {
+                    coins: newCoins,
+                    lastLoginBonusTime: Date.now()
+                };
+                await update(ref(db, 'users/' + userDbKey), updates);
+                usersData[userDbKey].coins = newCoins;
+                usersData[userDbKey].lastLoginBonusTime = updates.lastLoginBonusTime;
+
+                await logTransaction(userDbKey, 'bonus', appSettings.dailyBonusAmount, { reason: "Daily Login" });
+                logAppEvent("daily_bonus_claimed", { userId: userDbKey, amount: appSettings.dailyBonusAmount });
+
+                updateUIDisplayForCurrentUser();
+                alert(`You received ${appSettings.dailyBonusAmount} coins as a daily bonus!`);
             } catch (error) {
-                console.error("Error submitting withdrawal:", error);
-                alert("Withdrawal request failed.");
+                console.error("Error claiming daily bonus:", error);
+                logAppEvent("error", { function: "claimDailyBonus", message: error.message });
+                alert("Failed to claim daily bonus. Try again.");
+                if(claimDailyBonusBtn) claimDailyBonusBtn.disabled = false;
             }
         });
 
-        wheel.addEventListener('click', () => {
-            if (!getCurrentUserDbKey()) { alert("Please login to spin."); return; }
+        function updateSpinCooldownDisplay(userData) {
+            if (!userData || !spinBtn || !spinCooldownMessage) return;
+            if (spinCooldownTimer) clearInterval(spinCooldownTimer);
+
+            const now = Date.now();
+            const lastSpin = userData.lastSpinTime || 0;
+            const cooldownMillis = SHORT_SPIN_COOLDOWN_SECONDS * 1000;
+            const timeSinceLastSpin = now - lastSpin;
+
+            if (timeSinceLastSpin < cooldownMillis) {
+                spinBtn.disabled = true;
+                let timeLeftSeconds = Math.ceil((cooldownMillis - timeSinceLastSpin) / 1000);
+                spinCooldownMessage.textContent = `Next spin in ${timeLeftSeconds}s`;
+
+                spinCooldownTimer = setInterval(() => {
+                    timeLeftSeconds--;
+                    if (timeLeftSeconds > 0) {
+                        spinCooldownMessage.textContent = `Next spin in ${timeLeftSeconds}s`;
+                    } else {
+                        clearInterval(spinCooldownTimer);
+                        spinCooldownMessage.textContent = "";
+                        if(spinBtn) spinBtn.disabled = userData.isBanned || false;
+                    }
+                }, 1000);
+            } else {
+                spinCooldownMessage.textContent = "";
+                if(spinBtn) spinBtn.disabled = userData.isBanned || false;
+            }
+        }
+
+        if (spinBtn) spinBtn.addEventListener('click', () => {
             const userData = getCurrentUserData();
-            if (userData && userData.isBanned) {
-                alert("Your account is suspended. You cannot spin."); return;
+            if (!userData) { alert("Please login to spin."); return; }
+            if (userData.isBanned) { alert("Your account is banned. You cannot spin."); return; }
+
+            const now = Date.now();
+            const lastSpin = userData.lastSpinTime || 0;
+            const cooldownMillis = SHORT_SPIN_COOLDOWN_SECONDS * 1000;
+            if ((now - lastSpin) < cooldownMillis) {
+                return;
+            }
+            if (isSpinning) { return; }
+            if(spinModal) spinModal.style.display = 'flex';
+        });
+        if (withdrawBtn) withdrawBtn.addEventListener('click', () => {
+            const userData = getCurrentUserData();
+            if (!userData) { alert("Please login first."); return; }
+            if (userData.isBanned) { alert("Your account is banned. You cannot withdraw."); return; }
+
+            if(withdrawModalCoinBalance) withdrawModalCoinBalance.textContent = userData.coins || 0;
+            if(withdrawAmountInput) withdrawAmountInput.value = '';
+            if(upiIdInput) upiIdInput.value = userData.lastUpiId || '';
+            if(minWithdrawDisplay) minWithdrawDisplay.textContent = appSettings.minWithdrawal;
+            if(maxWithdrawDisplay) maxWithdrawDisplay.textContent = appSettings.maxWithdrawal;
+
+            if ((userData.coins || 0) < appSettings.minWithdrawal) {
+                alert(`Minimum ${appSettings.minWithdrawal} coins required to withdraw.`);
+                return;
+            }
+            if(withdrawModal) withdrawModal.style.display = 'flex';
+        });
+        if (historyBtn) historyBtn.addEventListener('click', showTransactionHistoryForUser);
+
+        if (shareAppBtn) shareAppBtn.addEventListener('click', () => {
+            const userData = getCurrentUserData();
+            if(appDownloadLinkInput) appDownloadLinkInput.value = appSettings.shareLink;
+
+            if (userData && userReferralCodeDisplay) {
+                userReferralCodeDisplay.textContent = userData.referralCode || "N/A";
+            } else if (userReferralCodeDisplay) {
+                userReferralCodeDisplay.textContent = "Loading...";
+            }
+
+             if (userData && referralCodeInput && submitReferralCodeBtn) {
+                referralMessageDiv.style.display = 'none';
+                referralCodeInput.value = '';
+                if (userData.hasUsedReferralCode) {
+                    referralCodeInput.value = userData.referredBy ? `Already used code from: ${usersData[userData.referredBy]?.name || userData.referredBy}` : "Referral code already used";
+                    referralCodeInput.disabled = true;
+                    submitReferralCodeBtn.disabled = true;
+                    submitReferralCodeBtn.textContent = "Bonus Claimed";
+                } else {
+                    referralCodeInput.disabled = false;
+                    submitReferralCodeBtn.disabled = false;
+                    submitReferralCodeBtn.textContent = "Submit Code";
+                }
+            }
+            if(shareAppModal) shareAppModal.style.display = 'flex';
+        });
+
+        if (copyDownloadLinkBtn) copyDownloadLinkBtn.addEventListener('click', async () => {
+             const linkToCopy = appDownloadLinkInput.value;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                try {
+                    await navigator.clipboard.writeText(linkToCopy);
+                    alert('Download link copied to clipboard!');
+                } catch (err) {
+                    console.error('Failed to copy link:', err);
+                    alert('Could not copy link. Please try again or copy manually.');
+                }
+            } else {
+                appDownloadLinkInput.select();
+                appDownloadLinkInput.setSelectionRange(0, 99999);
+                try {
+                    document.execCommand('copy');
+                    alert('Download link copied to clipboard! (fallback)');
+                } catch (err) {
+                    alert('Copying failed. Please copy the link manually.');
+                }
+            }
+        });
+
+        function openSupportLink() {
+            if (appSettings.contactSupportLink) {
+                window.open(appSettings.contactSupportLink, '_blank');
+            } else {
+                alert("Support contact not configured yet.");
+            }
+        }
+        if (contactSupportBtn) contactSupportBtn.addEventListener('click', openSupportLink);
+        if (authContactSupportBtn) authContactSupportBtn.addEventListener('click', openSupportLink);
+
+
+        if (closeShareAppModalBtn) closeShareAppModalBtn.addEventListener('click', () => { if(shareAppModal) shareAppModal.style.display = 'none'; });
+
+        if (submitReferralCodeBtn) submitReferralCodeBtn.addEventListener('click', async () => {
+            const refereeDbKey = getCurrentUserDbKey();
+            const refereeData = getCurrentUserData();
+            const enteredCode = referralCodeInput.value.trim().toUpperCase();
+
+            referralMessageDiv.style.display = 'none';
+
+            if (!refereeDbKey || !refereeData) {
+                alert("Please login to use a referral code."); return;
+            }
+            if (!enteredCode) {
+                showReferralMessage("Please enter a referral code.", true); return;
+            }
+            if (refereeData.hasUsedReferralCode) {
+                showReferralMessage("You have already used a referral code.", true); return;
+            }
+            if (refereeData.referralCode === enteredCode) {
+                showReferralMessage("You cannot use your own referral code.", true); return;
+            }
+
+            submitReferralCodeBtn.disabled = true; submitReferralCodeBtn.textContent = "Verifying...";
+            showLoading(true);
+
+            try {
+                const referrerIdSnapshot = await get(ref(db, `referralCodes/${enteredCode}`));
+                if (!referrerIdSnapshot.exists()) {
+                    showReferralMessage("Invalid referral code.", true); return;
+                }
+                const referrerId = referrerIdSnapshot.val();
+                if (referrerId === refereeDbKey) {
+                     showReferralMessage("You cannot use your own referral code.", true); return;
+                }
+
+                const currentReferralBonus = appSettings.referralBonusAmount;
+                const newRefereeCoins = (refereeData.coins || 0) + currentReferralBonus;
+                const refereeUpdates = {
+                    coins: newRefereeCoins,
+                    hasUsedReferralCode: true,
+                    referredBy: referrerId
+                };
+                await update(ref(db, `users/${refereeDbKey}`), refereeUpdates);
+
+                usersData[refereeDbKey].coins = newRefereeCoins;
+                usersData[refereeDbKey].hasUsedReferralCode = true;
+                usersData[refereeDbKey].referredBy = referrerId;
+
+                await logTransaction(refereeDbKey, 'referral_bonus', currentReferralBonus, {
+                    reason: "Entered referral code",
+                    codeUsed: enteredCode,
+                    referrerId: referrerId
+                });
+                logAppEvent("referral_code_used", { refereeId: refereeDbKey, referrerId: referrerId, code: enteredCode, bonus: currentReferralBonus });
+
+                showReferralMessage(`Success! ${currentReferralBonus} coins added to your account.`, false);
+                updateUIDisplayForCurrentUser();
+                referralCodeInput.value = '';
+
+            } catch (error) {
+                console.error("Error submitting referral code:", error);
+                logAppEvent("error", { function: "submitReferralCode", message: error.message });
+                showReferralMessage("An error occurred. Please try again.", true);
+            } finally {
+                if (refereeData && !refereeData.hasUsedReferralCode) {
+                   if(submitReferralCodeBtn) { submitReferralCodeBtn.disabled = false; submitReferralCodeBtn.textContent = "Submit Code"; }
+                }
+                showLoading(false);
+            }
+        });
+
+        function showReferralMessage(message, isError) {
+            if (referralMessageDiv) {
+                referralMessageDiv.textContent = message;
+                referralMessageDiv.style.display = 'block';
+                referralMessageDiv.style.color = isError ? 'var(--danger-color)' : 'var(--success-color)';
+                referralMessageDiv.style.backgroundColor = isError ? '#f8d7da' : '#d4edda';
+                referralMessageDiv.style.borderColor = isError ? '#f5c6cb' : '#c3e6cb';
+            }
+        }
+
+        if (closeSpinModalBtn) closeSpinModalBtn.addEventListener('click', () => { if(spinModal) spinModal.style.display = 'none'; });
+        if (collectWinningsBtn) collectWinningsBtn.addEventListener('click', () => { if(spinResultModal) spinResultModal.style.display = 'none'; });
+        if (closeWithdrawModalBtn) closeWithdrawModalBtn.addEventListener('click', () => { if(withdrawModal) withdrawModal.style.display = 'none'; });
+        if (closeHistoryModalBtn) closeHistoryModalBtn.addEventListener('click', () => { if(historyModal) historyModal.style.display = 'none'; });
+        if (closeAdminEditUserModalBtn) closeAdminEditUserModalBtn.addEventListener('click', () => { if(adminEditUserModal) adminEditUserModal.style.display = 'none'; });
+        if (closeAdModalBtn) closeAdModalBtn.addEventListener('click', () => { if(adModal) adModal.style.display = 'none'; });
+
+
+        async function logTransaction(userId, type, amount, details = {}) {
+            if (!userId) return;
+            try {
+                const timestamp = fbServerTimestamp();
+                const transactionKey = Date.now() + "_" + type + "_" + Math.random().toString(36).substr(2,5);
+
+                const userTransactionPayload = { type, amount, details, timestamp };
+                const userTransactionRef = ref(db, `userTransactions/${userId}/${transactionKey}`);
+                await set(userTransactionRef, userTransactionPayload);
+
+                const allSystemTransactionPayload = {
+                    userId, type, amount, details, timestamp,
+                    userTransactionKey: transactionKey
+                };
+                const allSystemTransactionRef = ref(db, `allSystemTransactions/${transactionKey}`);
+                await set(allSystemTransactionRef, allSystemTransactionPayload);
+
+                console.log("Transaction logged for user and system:", userTransactionPayload);
+            } catch (error) {
+                console.error("Error logging transaction:", error);
+                logAppEvent("error", { function: "logTransaction", message: error.message, userId });
+            }
+        }
+
+        if (submitWithdrawBtn) submitWithdrawBtn.addEventListener('click', async () => {
+            const userDbKey = getCurrentUserDbKey();
+            const userData = getCurrentUserData();
+
+            if (!userDbKey || !userData) { alert("Error: Not logged in."); return; }
+            if (userData.isBanned) { alert("Your account is banned. You cannot submit withdrawal requests."); return; }
+
+            const amountToWithdraw = parseInt(withdrawAmountInput.value);
+            const upi = upiIdInput.value.trim();
+
+            if (isNaN(amountToWithdraw) || amountToWithdraw < appSettings.minWithdrawal || amountToWithdraw > appSettings.maxWithdrawal) {
+                alert(`Please enter a valid amount between ${appSettings.minWithdrawal} and ${appSettings.maxWithdrawal} coins.`); return;
+            }
+            if ((userData.coins || 0) < amountToWithdraw) {
+                alert(`You don't have enough coins. You need ${amountToWithdraw}, but have ${userData.coins || 0}.`); return;
+            }
+            if (!upi || !/^[a-zA-Z0-9.\-_]{2,256}@[a-zA-Z]{2,64}$/.test(upi)) {
+                alert('Please enter a valid UPI ID (e.g., yourname@bank).'); return;
+            }
+
+            submitWithdrawBtn.disabled = true; submitWithdrawBtn.textContent = "Submitting...";
+            const withdrawalId = "wd_" + Date.now() + "_" + Math.random().toString(36).substr(2, 5);
+
+            const fbWithdrawalPayload = {
+                id: withdrawalId, userId: userDbKey,
+                userPhoneNumber: userData.phoneNumber || (currentUser ? (currentUser.email || currentUser.uid) : 'N/A'),
+                userName: userData.name || (currentUser ? currentUser.displayName : 'Unknown User'),
+                amount: amountToWithdraw, upiId: upi, status: 'pending', timestamp: fbServerTimestamp()
+            };
+            const newCoinsForUser = (userData.coins || 0) - amountToWithdraw;
+
+            try {
+                await set(ref(db, 'withdrawals/' + withdrawalId), fbWithdrawalPayload);
+                await update(ref(db, 'users/' + userDbKey), {
+                    coins: newCoinsForUser, lastUpiId: upi
+                });
+
+                if (usersData[userDbKey]) {
+                    usersData[userDbKey].coins = newCoinsForUser;
+                    usersData[userDbKey].lastUpiId = upi;
+                }
+                await logTransaction(userDbKey, 'withdrawal_request', -amountToWithdraw, { upiId: upi, withdrawalId: withdrawalId, status: 'pending' });
+                logAppEvent("withdrawal_request", { userId: userDbKey, amount: amountToWithdraw, upi: upi, withdrawalId: withdrawalId });
+
+                updateUIDisplayForCurrentUser();
+                if(withdrawModal) withdrawModal.style.display = 'none';
+                if(withdrawAmountInput) withdrawAmountInput.value = '';
+                alert(`Withdrawal request for ${amountToWithdraw} coins submitted! Check history for status updates.`);
+            } catch (error) {
+                console.error("Error submitting withdrawal:", error);
+                logAppEvent("error", { function: "submitWithdrawBtn", message: error.message });
+                alert("Withdrawal request failed. Please try again later.");
+            } finally {
+                 if(submitWithdrawBtn) { submitWithdrawBtn.disabled = false; submitWithdrawBtn.textContent = `Submit Request`; }
+            }
+        });
+
+        if (wheel) wheel.addEventListener('click', () => {
+            const userData = getCurrentUserData();
+            if (!userData) { alert("Please login to spin."); return; }
+            if (userData.isBanned) { alert("Your account is banned."); return; }
+
+            const now = Date.now();
+            const lastSpin = userData.lastSpinTime || 0;
+            const cooldownMillis = SHORT_SPIN_COOLDOWN_SECONDS * 1000;
+            if ((now - lastSpin) < cooldownMillis) {
+                return;
             }
             if (!isSpinning) spinWheel();
         });
 
         function createWheel() {
-            const existingTextContainers = wheel.querySelectorAll('.wheel-text-container');
-            existingTextContainers.forEach(tc => tc.remove());
+            if (!wheel) return;
+            wheel.innerHTML = '<div class="wheel-center"></div>';
             let gradientParts = [];
+            if (!activeWheelSegments || activeWheelSegments.length === 0) {
+                wheel.style.background = '#ccc'; return;
+            }
+            numSegments = activeWheelSegments.length;
+            anglePerSegment = 360 / numSegments;
 
-            segments.forEach((segment, i) => {
-                const startAngle = i * anglePerSegment;
-                const endAngle = (i + 1) * anglePerSegment;
+            activeWheelSegments.forEach((segment, i) => {
+                const startAngle = i * anglePerSegment; const endAngle = (i + 1) * anglePerSegment;
                 gradientParts.push(`${segment.color} ${startAngle}deg ${endAngle}deg`);
-                const textContainer = document.createElement('div');
-                textContainer.className = 'wheel-text-container';
+                const textContainer = document.createElement('div'); textContainer.className = 'wheel-text-container';
                 const segmentMiddleAngle = startAngle + (anglePerSegment / 2);
                 textContainer.style.transform = `rotate(${segmentMiddleAngle}deg)`;
-                const textSpan = document.createElement('span');
-                textSpan.className = 'wheel-text-content';
+                const textSpan = document.createElement('span'); textSpan.className = 'wheel-text-content';
                 textSpan.textContent = segment.text;
-                textContainer.appendChild(textSpan);
-                wheel.appendChild(textContainer);
+                textContainer.appendChild(textSpan); wheel.appendChild(textContainer);
             });
             wheel.style.background = `conic-gradient(${gradientParts.join(', ')})`;
         }
 
-        function spinWheel() {
-            const userDbKey = getCurrentUserDbKey();
-            const userData = getCurrentUserData();
-            if (isSpinning || !userDbKey || !userData) return;
-            if (userData.isBanned) { alert("Your account is suspended."); return; }
+        function showAdAfterSpin() {
+            if (appSettings.adCodeAfterSpin && appSettings.adCodeAfterSpin.trim() !== "" && appSettings.adCodeAfterSpin.trim() !== "<!-- Default Ad Code Placeholder -->") {
+                if (adModalContainer) adModalContainer.innerHTML = appSettings.adCodeAfterSpin;
+                if (adModal) adModal.style.display = 'flex';
+                const scripts = adModalContainer.getElementsByTagName('script');
+                for (let i = 0; i < scripts.length; i++) {
+                    const script = document.createElement('script');
+                    if (scripts[i].src) {
+                        script.src = scripts[i].src;
+                    } else {
+                        script.textContent = scripts[i].innerHTML;
+                    }
+                    document.body.appendChild(script).parentNode.removeChild(script);
+                }
+            }
+        }
 
-            isSpinning = true; spinBtn.disabled = true; wheel.style.pointerEvents = 'none';
+        function spinWheel() {
+            const userDbKey = getCurrentUserDbKey(); const userData = getCurrentUserData();
+            if (isSpinning || !userDbKey || !userData || userData.isBanned) return;
+            isSpinning = true; if(spinBtn) spinBtn.disabled = true; wheel.style.pointerEvents = 'none';
             const minRotations = 5; const randomExtraDegrees = Math.floor(Math.random() * 360);
             const totalSpinDegrees = (minRotations * 360) + randomExtraDegrees;
             wheel.style.transition = 'transform 4s cubic-bezier(0.22, 0.61, 0.36, 1)';
             wheel.style.transform = `rotate(${totalSpinDegrees}deg)`;
 
             setTimeout(async () => {
-                const effectiveWheelRotation = totalSpinDegrees % 360;
-                const pointerOffsetAngle = 270;
+                const effectiveWheelRotation = totalSpinDegrees % 360; const pointerOffsetAngle = 270;
                 let winningAngle = (pointerOffsetAngle - (effectiveWheelRotation % 360) + 360) % 360;
                 const winningSegmentIndex = Math.floor(winningAngle / anglePerSegment);
+                const prize = parseInt(activeWheelSegments[winningSegmentIndex].text);
 
-                if (!segments || winningSegmentIndex < 0 || winningSegmentIndex >= segments.length || !segments[winningSegmentIndex]) {
-                    console.error("Error determining winning segment. Segments:", segments, "Index:", winningSegmentIndex);
-                    alert("An error occurred during the spin. Please try again.");
-                    isSpinning = false; spinBtn.disabled = false; wheel.style.pointerEvents = 'auto';
-                    spinModal.style.display = 'none';
-                    wheel.style.transition = 'none';
-                    wheel.style.transform = `rotate(${effectiveWheelRotation % 360}deg)`;
-                    setTimeout(() => {
-                        wheel.style.transition = 'transform 4s cubic-bezier(0.22, 0.61, 0.36, 1)';
-                    }, 50);
-                    return;
-                }
-
-                const prize = parseInt(segments[winningSegmentIndex].text);
-                const currentCoinTotal = usersData[userDbKey].coins;
+                const currentCoinTotal = usersData[userDbKey].coins || 0;
                 const newCoinTotal = currentCoinTotal + prize;
                 try {
-                    await update(ref(db, 'users/' + userDbKey), { coins: newCoinTotal });
+                    const updates = {
+                        coins: newCoinTotal, lastSpinTime: Date.now()
+                    };
+                    await update(ref(db, 'users/' + userDbKey), updates);
                     usersData[userDbKey].coins = newCoinTotal;
-                    updateCoinDisplayForCurrentUser();
+                    usersData[userDbKey].lastSpinTime = updates.lastSpinTime;
+
+                    await logTransaction(userDbKey, 'spin_win', prize, { segmentValue: prize, segmentDetails: activeWheelSegments[winningSegmentIndex] });
+                    logAppEvent("spin_completed", { userId: userDbKey, prize: prize });
+
+                    updateUIDisplayForCurrentUser();
                 } catch (error) {
-                    console.error("Error updating coins after spin:", error);
-                    alert("Failed to save winnings. Check connection.");
+                    console.error("Spin Winnings Error:", error);
+                    logAppEvent("error", { function: "spinWheel.updateWinnings", message: error.message });
+                    alert("Failed to save winnings.");
                 }
 
-                spinWinningsAmount.textContent = prize;
-                spinResultModal.style.display = 'flex';
-                spinModal.style.display = 'none';
+                if (spinWinningsAmount) spinWinningsAmount.textContent = prize;
+                if (spinResultModal) spinResultModal.style.display = 'flex';
+                if (spinModal) spinModal.style.display = 'none';
+
+                showAdAfterSpin();
 
                 setTimeout(() => {
-                    wheel.style.transition = 'none';
-                    wheel.style.transform = `rotate(${effectiveWheelRotation % 360}deg)`;
+                    wheel.style.transition = 'none'; wheel.style.transform = `rotate(${effectiveWheelRotation % 360}deg)`;
                     setTimeout(() => {
                         wheel.style.transition = 'transform 4s cubic-bezier(0.22, 0.61, 0.36, 1)';
-                        wheel.style.pointerEvents = 'auto';
-                        isSpinning = false;
-                        spinBtn.disabled = false;
+                        wheel.style.pointerEvents = 'auto'; isSpinning = false;
+                        updateSpinCooldownDisplay(getCurrentUserData());
                     }, 50);
                 }, 500);
             }, 4100);
         }
 
-        async function copyDownloadLinkToClipboard() {
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                try {
-                    await navigator.clipboard.writeText(APP_DOWNLOAD_LINK);
-                    alert('App download link copied to clipboard!');
-                    copyLinkModal.style.display = 'none'; // Close modal on successful copy
-                } catch (err) {
-                    console.error('Failed to copy app download link to clipboard:', err);
-                    alert('Could not copy link. Please copy it manually from the field.');
-                }
-            } else {
-                // This case should ideally not be reached if the modal is shown
-                // because the modal is shown when clipboard API is the target.
-                alert('Clipboard API not available. Please copy link manually.');
-            }
-        }
-        copyLinkBtnInModal.addEventListener('click', copyDownloadLinkToClipboard);
-
-
-        async function handleShareApp() {
-            const shareTitle = 'Download D-earning App!';
-            const shareMessage = `💰 Spin the wheel and earn real rewards with D-earning App! Download now: ${APP_DOWNLOAD_LINK}`;
-
-            if (navigator.share) {
-                try {
-                    await navigator.share({
-                        title: shareTitle,
-                        text: shareMessage,
-                        url: APP_DOWNLOAD_LINK
-                    });
-                    console.log('App download link shared successfully via native share.');
-                } catch (err) {
-                    console.error('Error using navigator.share:', err);
-                    if (err.name !== 'AbortError') {
-                        // If native share fails (not cancelled), show the copy modal
-                        appDownloadLinkDisplay.value = APP_DOWNLOAD_LINK;
-                        copyLinkModal.style.display = 'flex';
-                    } else {
-                        console.log('Native share cancelled by user.');
-                    }
-                }
-            } else {
-                // If navigator.share is not available, show the copy modal directly
-                appDownloadLinkDisplay.value = APP_DOWNLOAD_LINK;
-                copyLinkModal.style.display = 'flex';
-            }
-        }
-        shareAppBtn.addEventListener('click', handleShareApp);
-
-
-        function showWithdrawalHistoryForUser() {
+        function showTransactionHistoryForUser() {
             const userDbKey = getCurrentUserDbKey();
             if (!userDbKey) { alert("Please login to view history."); return; }
-            renderUserHistory();
-            historyModal.style.display = 'flex';
+            if (!userTransactionsListener) {
+                renderUserTransactionHistory(userDbKey);
+            }
+             if(historyModal) historyModal.style.display = 'flex';
+             renderUserTransactionHistory(userDbKey);
         }
 
-        function renderUserHistory() {
-            historyListDiv.innerHTML = '';
+        function attachUserTransactionListener() {
             const userDbKey = getCurrentUserDbKey();
-            if (!userDbKey) { historyListDiv.innerHTML = '<p>Please log in.</p>'; return; }
-            const userWithdrawalsArray = Object.values(allWithdrawals || {}).filter(w => w.userId === userDbKey).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-            if (userWithdrawalsArray.length === 0) { historyListDiv.innerHTML = '<p>No withdrawal history.</p>'; return; }
-            userWithdrawalsArray.forEach(withdrawal => {
-                const item = document.createElement('div'); item.className = 'history-item';
-                const rupees = (withdrawal.amount / 100).toFixed(2);
-                item.innerHTML = `<p><strong>Amount:</strong> ${withdrawal.amount} coins (₹${rupees})</p>
-                                  <p><strong>UPI ID:</strong> ${withdrawal.upiId}</p>
-                                  <p><strong>Date:</strong> ${withdrawal.timestamp ? new Date(withdrawal.timestamp).toLocaleString() : 'Processing...'}</p>
-                                  <p><strong>Status:</strong> <span class="status-${withdrawal.status}" style="font-weight:bold;">${withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}</span></p>`;
-                historyListDiv.appendChild(item);
+            if (!userDbKey) return;
+
+            if (userTransactionsListener) {
+                userTransactionsListener();
+                userTransactionsListener = null;
+            }
+
+            const transactionsRef = query(ref(db, `userTransactions/${userDbKey}`), orderByChild('timestamp'), limitToLast(50));
+            userTransactionsListener = onValue(transactionsRef, (snapshot) => {
+                if (historyModal && historyModal.style.display === 'flex') {
+                     renderUserTransactionHistory(userDbKey, snapshot);
+                }
+            }, (error) => {
+                console.error("Error listening to user transactions:", error);
+                logAppEvent("error", { function: "attachUserTransactionListener", message: error.message, userId: userDbKey });
+                if (transactionHistoryListDiv && historyModal && historyModal.style.display === 'flex') {
+                    transactionHistoryListDiv.innerHTML = '<p>Could not load history in real-time. Please try again.</p>';
+                }
             });
         }
 
-        adminAccessBtn.addEventListener('click', () => {
-            const enteredPassword = prompt("Enter Admin Password:");
-            if (enteredPassword === ADMIN_PASSWORD) { showAdminPanel(); }
-            else if (enteredPassword !== null) { alert("Incorrect admin password."); }
+        async function renderUserTransactionHistory(userDbKey, snapshot = null) {
+            if(transactionHistoryListDiv) transactionHistoryListDiv.innerHTML = '<p>Loading history...</p>';
+            if (!userDbKey) { if(transactionHistoryListDiv) transactionHistoryListDiv.innerHTML = '<p>Please log in.</p>'; return; }
+
+            try {
+                if (!snapshot) {
+                    const transactionsQuery = query(ref(db, `userTransactions/${userDbKey}`), orderByChild('timestamp'), limitToLast(50));
+                    snapshot = await get(transactionsQuery);
+                }
+
+                if (!snapshot.exists() || snapshot.val() === null) {
+                    if(transactionHistoryListDiv) transactionHistoryListDiv.innerHTML = '<p>No transaction history yet.</p>';
+                    return;
+                }
+
+                const userTransactionsArray = [];
+                snapshot.forEach(childSnapshot => {
+                    userTransactionsArray.push({ id: childSnapshot.key, ...childSnapshot.val() });
+                });
+                userTransactionsArray.reverse();
+
+                if (userTransactionsArray.length === 0) {
+                    if(transactionHistoryListDiv) transactionHistoryListDiv.innerHTML = '<p>No transaction history yet.</p>'; return;
+                }
+                if(transactionHistoryListDiv) transactionHistoryListDiv.innerHTML = '';
+
+                userTransactionsArray.forEach(tx => {
+                    const item = document.createElement('div'); item.className = 'transaction-item';
+                    const dateString = tx.timestamp ? new Date(tx.timestamp).toLocaleString() : 'Processing...';
+                    let description = '';
+                    let amountDisplay = `${tx.amount > 0 ? '+' : ''}${tx.amount} coins`;
+                    let statusHTML = '';
+
+                    switch(tx.type) {
+                        case 'spin_win':
+                            description = `Spin Win: ${tx.details && tx.details.segmentValue ? tx.details.segmentValue + ' coins' : (tx.amount + ' coins') }`;
+                            item.classList.add('transaction-type-spin_win');
+                            break;
+                        case 'bonus':
+                            description = `Bonus: ${tx.details && tx.details.reason ? tx.details.reason : 'General Bonus'}`;
+                            item.classList.add('transaction-type-bonus');
+                            break;
+                        case 'referral_bonus':
+                            description = `Referral Bonus: Received for using code ${tx.details?.codeUsed || ''}`;
+                            item.classList.add('transaction-type-referral_bonus');
+                            break;
+                        case 'admin_gift': // New transaction type
+                            description = `System Gift: Coins added by admin.`;
+                            item.classList.add('transaction-type-admin_gift');
+                            break;
+                        case 'admin_deduction': // New transaction type
+                            description = `System Deduction: Coins removed by admin.`;
+                            amountDisplay = `${tx.amount} coins`; // Amount is already negative
+                            item.classList.add('transaction-type-admin_deduction');
+                            break;
+                        case 'withdrawal_request':
+                            description = `Withdrawal Request to UPI: ${tx.details && tx.details.upiId ? tx.details.upiId : 'N/A'}`;
+                            amountDisplay = `${tx.amount} coins`;
+                            item.classList.add('transaction-type-withdrawal_request');
+
+                            const withdrawalId = tx.details?.withdrawalId;
+                            let currentStatus = 'pending';
+
+                            if (withdrawalId && allWithdrawals && allWithdrawals[withdrawalId]) {
+                                currentStatus = allWithdrawals[withdrawalId].status;
+                            } else if (tx.details && tx.details.status) {
+                                currentStatus = tx.details.status;
+                            }
+                            statusHTML = `<p><strong>Status:</strong> <span class="status-${currentStatus}">${currentStatus.charAt(0).toUpperCase() + currentStatus.slice(1)}</span></p>`;
+                            break;
+                        case 'withdrawal_reject_refund':
+                            description = `Withdrawal Rejected - Refunded. Ref: ${tx.details && tx.details.withdrawalId ? tx.details.withdrawalId : 'N/A'}`;
+                            item.classList.add('transaction-type-withdrawal_reject_refund');
+                            break;
+                        default:
+                            description = `Unknown Transaction: ${tx.type}`;
+                    }
+                    item.innerHTML = `<p><strong>Date:</strong> ${dateString}</p>
+                                      <p><strong>Type:</strong> ${description}</p>
+                                      <p><strong>Amount:</strong> ${amountDisplay}</p>
+                                      ${statusHTML}`;
+                    if(transactionHistoryListDiv) transactionHistoryListDiv.appendChild(item);
+                });
+            } catch (error) {
+                console.error("Error fetching/rendering transaction history:", error);
+                logAppEvent("error", { function: "renderUserTransactionHistory", message: error.message, userId: userDbKey });
+                if(transactionHistoryListDiv) transactionHistoryListDiv.innerHTML = '<p>Could not load history. Please try again.</p>';
+            }
+        }
+
+        if (adminAccessBtn) adminAccessBtn.addEventListener('click', () => {
+            const userDbKey = getCurrentUserDbKey();
+            const userData = getCurrentUserData();
+
+            if (userDbKey && userData) {
+                const THE_ONLY_ADMIN_KEY = "6388654375";
+
+                if (userDbKey === THE_ONLY_ADMIN_KEY && userData.isAdmin === true) {
+                    const pass = prompt("Admin Password:");
+                    if (pass === ADMIN_PASSWORD) {
+                        logAppEvent("admin_access_SUCCESS", { userId: userDbKey });
+                        showAdminPanel();
+                    } else if (pass !== null) {
+                        logAppEvent("admin_access_FAIL_wrong_password", { userId: userDbKey });
+                        alert("Incorrect admin password.");
+                    } else {
+                        logAppEvent("admin_access_CANCELLED_password_prompt", { userId: userDbKey });
+                    }
+                } else {
+                    logAppEvent("admin_access_FAIL_not_the_admin_user_or_no_admin_flag", {
+                        userId: userDbKey,
+                        isAdminFlag: userData.isAdmin,
+                        isKeyMatch: userDbKey === THE_ONLY_ADMIN_KEY,
+                        expectedAdminKey: THE_ONLY_ADMIN_KEY
+                    });
+                    alert("Access Denied. You are not authorized to view the admin panel.");
+                }
+            } else {
+                logAppEvent("admin_access_FAIL_not_logged_in_or_data_missing", { userDbKey: userDbKey, hasUserData: !!userData });
+                alert("Please login to check admin access.");
+            }
         });
 
-        backToAppBtn.addEventListener('click', () => {
+        if (backToAppBtn) backToAppBtn.addEventListener('click', () => {
             isAdminView = false;
-            if (getCurrentUserDbKey() && getCurrentUserData()) { showAppScreen(); }
-            else { showAuthScreen(); }
+            const userData = getCurrentUserData();
+            if (userData && !userData.isBanned) showAppScreen();
+            else showAuthScreen(userData?.isBanned ? "Your account is banned." : null);
         });
 
-        adminWithdrawalsTab.addEventListener('click', () => {
-            adminWithdrawalsContent.style.display = 'block'; adminUsersContent.style.display = 'none'; adminSettingsContent.style.display = 'none';
-            adminWithdrawalsTab.classList.add('active'); adminUsersTab.classList.remove('active'); adminSettingsTab.classList.remove('active');
+        if (adminWithdrawalsTab) adminWithdrawalsTab.addEventListener('click', () => {
+            adminWithdrawalsContent.style.display = 'block'; adminUsersContent.style.display = 'none'; adminAllTransactionsContent.style.display = 'none'; adminAppSettingsContent.style.display = 'none'; adminAppLogsContent.style.display = 'none';
+            adminWithdrawalsTab.classList.add('active'); adminUsersTab.classList.remove('active'); adminAllTransactionsTab.classList.remove('active'); adminAppSettingsTab.classList.remove('active'); adminAppLogsTab.classList.remove('active');
+            renderAdminWithdrawals();
         });
-        adminUsersTab.addEventListener('click', () => {
-            adminWithdrawalsContent.style.display = 'none'; adminUsersContent.style.display = 'block'; adminSettingsContent.style.display = 'none';
-            adminUsersTab.classList.add('active'); adminWithdrawalsTab.classList.remove('active'); adminSettingsTab.classList.remove('active');
+        if (adminUsersTab) adminUsersTab.addEventListener('click', () => {
+            adminWithdrawalsContent.style.display = 'none'; adminUsersContent.style.display = 'block'; adminAllTransactionsContent.style.display = 'none'; adminAppSettingsContent.style.display = 'none'; adminAppLogsContent.style.display = 'none';
+            adminWithdrawalsTab.classList.remove('active'); adminUsersTab.classList.add('active'); adminAllTransactionsTab.classList.remove('active'); adminAppSettingsTab.classList.remove('active'); adminAppLogsTab.classList.remove('active');
             renderAdminUsersList();
         });
-        adminSettingsTab.addEventListener('click', () => {
-            adminWithdrawalsContent.style.display = 'none'; adminUsersContent.style.display = 'none'; adminSettingsContent.style.display = 'block';
-            adminSettingsTab.classList.add('active'); adminWithdrawalsTab.classList.remove('active'); adminUsersTab.classList.remove('active');
+        if (adminAllTransactionsTab) adminAllTransactionsTab.addEventListener('click', () => {
+            adminWithdrawalsContent.style.display = 'none'; adminUsersContent.style.display = 'none'; adminAllTransactionsContent.style.display = 'block'; adminAppSettingsContent.style.display = 'none'; adminAppLogsContent.style.display = 'none';
+            adminWithdrawalsTab.classList.remove('active'); adminUsersTab.classList.remove('active'); adminAllTransactionsTab.classList.add('active'); adminAppSettingsTab.classList.remove('active'); adminAppLogsTab.classList.remove('active');
+            renderAdminAllTransactions();
+        });
+        if (adminAppSettingsTab) adminAppSettingsTab.addEventListener('click', () => {
+            adminWithdrawalsContent.style.display = 'none'; adminUsersContent.style.display = 'none'; adminAllTransactionsContent.style.display = 'none'; adminAppSettingsContent.style.display = 'block'; adminAppLogsContent.style.display = 'none';
+            adminWithdrawalsTab.classList.remove('active'); adminUsersTab.classList.remove('active'); adminAllTransactionsTab.classList.remove('active'); adminAppSettingsTab.classList.add('active'); adminAppLogsTab.classList.remove('active');
             renderAdminAppSettings();
+            renderAdminWheelSettings();
+        });
+        if (adminAppLogsTab) adminAppLogsTab.addEventListener('click', () => {
+            adminWithdrawalsContent.style.display = 'none'; adminUsersContent.style.display = 'none'; adminAllTransactionsContent.style.display = 'none'; adminAppSettingsContent.style.display = 'none'; adminAppLogsContent.style.display = 'block';
+            adminWithdrawalsTab.classList.remove('active'); adminUsersTab.classList.remove('active'); adminAllTransactionsTab.classList.remove('active'); adminAppSettingsTab.classList.remove('active'); adminAppLogsTab.classList.add('active');
+            renderAdminAppLogs();
         });
 
+        if(adminWithdrawalSearchInput) adminWithdrawalSearchInput.addEventListener('input', renderAdminWithdrawals);
+        if(adminWithdrawalStatusFilter) adminWithdrawalStatusFilter.addEventListener('change', renderAdminWithdrawals);
+        if(adminUserSearchInput) adminUserSearchInput.addEventListener('input', renderAdminUsersList);
+        if(adminAllTxSearchInput) adminAllTxSearchInput.addEventListener('input', renderAdminAllTransactions);
+        if(adminAllTxTypeFilter) adminAllTxTypeFilter.addEventListener('change', renderAdminAllTransactions);
+
+        function renderAdminPanelData() {
+            renderAdminWithdrawals();
+            renderAdminAppSettings();
+            updateAdminStats();
+        }
+
+        function updateAdminStats() {
+            const totalUsers = Object.keys(usersData).length;
+            let pendingWithdrawalsCount = 0;
+            let totalPaidCoins = 0;
+            let totalCirculatingCoins = 0;
+
+            Object.values(allWithdrawals).forEach(w => {
+                if (w.status === 'pending') pendingWithdrawalsCount++;
+                if (w.status === 'approved') totalPaidCoins += (w.amount || 0);
+            });
+            Object.values(usersData).forEach(u => {
+                totalCirculatingCoins += (u.coins || 0);
+            });
+
+            if(adminStatTotalUsers) adminStatTotalUsers.textContent = totalUsers;
+            if(adminStatPendingWithdrawals) adminStatPendingWithdrawals.textContent = pendingWithdrawalsCount;
+            if(adminStatTotalPaidCoins) adminStatTotalPaidCoins.textContent = totalPaidCoins;
+            if(adminStatTotalCoinsAwarded) adminStatTotalCoinsAwarded.textContent = totalCirculatingCoins;
+        }
+
         function renderAdminWithdrawals() {
+            if (!adminWithdrawalsListDiv) return;
             adminWithdrawalsListDiv.innerHTML = '';
-            const allWithdrawalsArray = Object.values(allWithdrawals || {}).sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-            if (allWithdrawalsArray.length === 0) { adminWithdrawalsListDiv.innerHTML = '<p>No withdrawal requests</p>'; return; }
+            if (!allWithdrawals || Object.keys(allWithdrawals).length === 0) {
+                adminWithdrawalsListDiv.innerHTML = '<p>No withdrawal requests</p>'; return;
+            }
+
+            const searchTerm = adminWithdrawalSearchInput ? adminWithdrawalSearchInput.value.toLowerCase() : "";
+            const statusFilter = adminWithdrawalStatusFilter ? adminWithdrawalStatusFilter.value : "all";
+
+            let allWithdrawalsArray = Object.values(allWithdrawals)
+                                           .filter(w => w)
+                                           .sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+            if (statusFilter !== 'all') {
+                allWithdrawalsArray = allWithdrawalsArray.filter(w => w.status === statusFilter);
+            }
+            if (searchTerm) {
+                allWithdrawalsArray = allWithdrawalsArray.filter(w =>
+                    (w.userId && w.userId.toLowerCase().includes(searchTerm)) ||
+                    (w.userName && w.userName.toLowerCase().includes(searchTerm)) ||
+                    (w.upiId && w.upiId.toLowerCase().includes(searchTerm)) ||
+                    (w.userPhoneNumber && w.userPhoneNumber.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (allWithdrawalsArray.length === 0) {
+                adminWithdrawalsListDiv.innerHTML = '<p>No matching withdrawal requests</p>'; return;
+            }
 
             allWithdrawalsArray.forEach(withdrawal => {
                 const item = document.createElement('div'); item.className = 'withdrawal-item';
                 const rupees = (withdrawal.amount / 100).toFixed(2);
-                let actionButtons = (withdrawal.status === 'pending') ? `<button class="action-btn approve-btn" data-id="${withdrawal.id}">Approve</button><button class="action-btn reject-btn" data-id="${withdrawal.id}">Reject</button>` : '';
-                const userName = withdrawal.userName || (usersData[withdrawal.userId] ? (usersData[withdrawal.userId].name || usersData[withdrawal.userId].email) : 'N/A');
-                const userIdentifier = withdrawal.userPhoneNumber !== 'N/A (Google User)' ? withdrawal.userPhoneNumber : withdrawal.userId;
-                item.innerHTML = `<p><strong>User:</strong> ${userName} (${userIdentifier})</p>
+                let actionButtons = '';
+                if (withdrawal.status === 'pending') {
+                    actionButtons = `<button class="action-btn approve-btn" data-id="${withdrawal.id}">Approve</button>
+                                     <button class="action-btn reject-btn" data-id="${withdrawal.id}">Reject</button>`;
+                }
+                const withdrawalUserData = usersData[withdrawal.userId];
+                const userName = withdrawal.userName || (withdrawalUserData ? (withdrawalUserData.name || withdrawalUserData.email) : 'N/A');
+                let userIdentifierDisplay = 'N/A';
+                if (withdrawal.userPhoneNumber && !withdrawal.userPhoneNumber.startsWith('N/A') && !withdrawal.userPhoneNumber.includes('@') && !withdrawal.userPhoneNumber.startsWith('Email:')) {
+                    userIdentifierDisplay = withdrawal.userPhoneNumber;
+                } else if (withdrawalUserData && withdrawalUserData.phoneNumber) {
+                    userIdentifierDisplay = withdrawalUserData.phoneNumber;
+                } else if (withdrawalUserData && withdrawalUserData.email) {
+                    userIdentifierDisplay = withdrawalUserData.email;
+                } else {
+                    userIdentifierDisplay = withdrawal.userId;
+                }
+                const dateString = withdrawal.timestamp ? new Date(withdrawal.timestamp).toLocaleString() : 'Processing...';
+                let statusClass = `status-${withdrawal.status}`;
+
+                item.innerHTML = `<p><strong>User:</strong> ${userName} (${userIdentifierDisplay})</p>
                                   <p><strong>ID:</strong> ${withdrawal.id}</p>
                                   <p><strong>Amount:</strong> ${withdrawal.amount} coins (₹${rupees})</p>
                                   <p><strong>UPI ID:</strong> ${withdrawal.upiId}</p>
-                                  <p><strong>Date:</strong> ${withdrawal.timestamp ? new Date(withdrawal.timestamp).toLocaleString() : 'Processing...'}</p>
-                                  <p><strong>Status:</strong> <span class="status-${withdrawal.status}" style="font-weight:bold;">${withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}</span></p>
+                                  <p><strong>Date:</strong> ${dateString}</p>
+                                  <p><strong>Status:</strong> <span class="${statusClass}" style="font-weight:bold;">${withdrawal.status.charAt(0).toUpperCase() + withdrawal.status.slice(1)}</span></p>
                                   ${actionButtons}`;
                 adminWithdrawalsListDiv.appendChild(item);
             });
-            adminWithdrawalsListDiv.querySelectorAll('.action-btn').forEach(btn => { btn.addEventListener('click', handleAdminAction); });
+            adminWithdrawalsListDiv.querySelectorAll('.action-btn').forEach(btn => btn.addEventListener('click', handleAdminWithdrawalAction));
+            updateAdminStats();
         }
 
-        async function handleAdminAction(e) {
-            const withdrawalId = e.target.getAttribute('data-id');
+        async function handleAdminWithdrawalAction(e) {
+            const withdrawalId = e.target.dataset.id;
             const action = e.target.classList.contains('approve-btn') ? 'approved' : 'rejected';
+
+            if (!allWithdrawals || !allWithdrawals[withdrawalId]) {
+                alert("Withdrawal request not found locally."); return;
+            }
             const withdrawalToUpdate = allWithdrawals[withdrawalId];
 
-            if (withdrawalToUpdate && withdrawalToUpdate.status === 'pending') {
+            if (withdrawalToUpdate.status === 'pending') {
+                e.target.disabled = true;
                 try {
                     await update(ref(db, 'withdrawals/' + withdrawalId), { status: action });
-                    allWithdrawals[withdrawalId].status = action;
+
+                    let alertMessage = '';
                     if (action === 'rejected') {
                         const userToRefundDbKey = withdrawalToUpdate.userId;
-                        const userToRefund = usersData[userToRefundDbKey];
-                        if (userToRefund) {
-                            const newCoinsForUser = userToRefund.coins + withdrawalToUpdate.amount;
+                        const userToRefundData = usersData[userToRefundDbKey];
+                        if (userToRefundData) {
+                            const currentCoins = userToRefundData.coins || 0;
+                            const amountToRefund = Number(withdrawalToUpdate.amount) || 0;
+                            const newCoinsForUser = currentCoins + amountToRefund;
+
                             await update(ref(db, 'users/' + userToRefundDbKey), { coins: newCoinsForUser });
-                            userToRefund.coins = newCoinsForUser;
-                            alert(`Withdrawal ${withdrawalId} rejected. ${withdrawalToUpdate.amount} coins refunded to ${userToRefund.name || userToRefund.email}.`);
-                        } else { alert(`Withdrawal ${withdrawalId} rejected. User ${userToRefundDbKey} not found for refund.`); }
-                    } else { alert(`Withdrawal ${withdrawalId} for ${usersData[withdrawalToUpdate.userId]?.name || withdrawalToUpdate.userId} approved.`); }
-                    renderAdminWithdrawals();
+                            userToRefundData.coins = newCoinsForUser;
+                            await logTransaction(userToRefundDbKey, 'withdrawal_reject_refund', amountToRefund, { withdrawalId: withdrawalId });
+                            alertMessage = `Withdrawal ID ${withdrawalId} for ${userToRefundData.name || userToRefundData.email || userToRefundDbKey} rejected. ${amountToRefund} coins refunded.`;
+                        } else {
+                            alertMessage = `Withdrawal ID ${withdrawalId} rejected. User ${userToRefundDbKey} not found for refund, but status updated.`;
+                        }
+                    } else {
+                        const userNameForAlert = usersData[withdrawalToUpdate.userId]?.name || usersData[withdrawalToUpdate.userId]?.email || withdrawalToUpdate.userId;
+                        alertMessage = `Withdrawal ID ${withdrawalId} for ${userNameForAlert} approved.`;
+                    }
+
+                    logAppEvent("withdrawal_processed", { admin: getCurrentUserDbKey(), withdrawalId: withdrawalId, action: action });
+                    alert(alertMessage);
                 } catch (error) {
                     console.error("Error updating withdrawal status:", error);
-                    alert("Failed to update status.");
+                    logAppEvent("error", { function: "handleAdminWithdrawalAction", message: error.message, withdrawalId: withdrawalId });
+                    alert("Failed to update withdrawal status. " + error.message);
+                } finally {
+                    if (e.target && e.target.disabled) e.target.disabled = false;
                 }
+            } else {
+                alert("This withdrawal request has already been processed.");
             }
         }
 
         function renderAdminUsersList() {
+            if (!adminUsersListDiv) return;
             adminUsersListDiv.innerHTML = '';
-            const userEntries = Object.entries(usersData || {});
-            if (userEntries.length === 0) { adminUsersListDiv.innerHTML = '<p>No registered users.</p>'; return; }
+            const searchTerm = adminUserSearchInput ? adminUserSearchInput.value.toLowerCase() : "";
+            let userEntries = Object.entries(usersData || {});
 
-            userEntries.sort(([,a], [,b]) => (a.name || a.email || "").localeCompare(b.name || b.email || ""));
+            if (searchTerm) {
+                userEntries = userEntries.filter(([key, user]) =>
+                    key.toLowerCase().includes(searchTerm) ||
+                    (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+                    (user.email && user.email.toLowerCase().includes(searchTerm)) ||
+                    (user.phoneNumber && user.phoneNumber.toLowerCase().includes(searchTerm)) ||
+                    (user.referralCode && user.referralCode.toLowerCase().includes(searchTerm))
+                );
+            }
+
+            if (userEntries.length === 0) { adminUsersListDiv.innerHTML = '<p>No matching users.</p>'; return; }
+            userEntries.sort(([,a], [,b]) => (a.name||"").localeCompare(b.name||""));
 
             userEntries.forEach(([key, user]) => {
-                const item = document.createElement('div');
-                item.className = 'user-list-item';
-                item.dataset.userid = key;
-                const rupees = (user.coins / 100).toFixed(2);
+                const item = document.createElement('div'); item.className = 'user-list-item';
+                const coins = user.coins || 0; const rupees = (coins / 100).toFixed(2);
                 const regDate = user.registeredAt ? new Date(user.registeredAt).toLocaleDateString() : 'N/A';
-                const displayName = user.name || user.email || "Unknown User";
-                const displayIdentifier = user.phoneNumber || key;
-                const isBanned = user.isBanned || false;
+                const banStatusText = user.isBanned ? "Banned" : "Active";
+                const banStatusClass = user.isBanned ? "status-banned" : "status-active";
+                const editButton = `<button class="admin-user-action-btn edit-btn" data-userid="${key}">Edit</button>`;
 
                 item.innerHTML = `
-                    <p><strong>Name:</strong> ${displayName}</p>
-                    <p><strong>Identifier:</strong> ${displayIdentifier}</p>
-                    <p><strong>Coins:</strong> <span id="coins-admin-${key}">${user.coins}</span> (₹${rupees})</p>
+                    <p><strong>Name:</strong> ${user.name || user.email || "N/A"}</p>
+                    <p><strong>ID:</strong> ${key}</p>
+                    <p><strong>Email:</strong> ${user.email || "N/A"}</p>
+                    <p><strong>Phone:</strong> ${user.phoneNumber || "N/A"}</p>
+                    <p><strong>Coins:</strong> ${coins} (₹${rupees})</p>
                     <p><strong>Registered:</strong> ${regDate}</p>
-                    <p><strong>Auth:</strong> ${user.authProvider || 'Unknown'}</p>
-                    <p><strong>Status:</strong> <span id="status-admin-${key}" class="${isBanned ? 'status-banned' : 'status-active'}">${isBanned ? 'Banned' : 'Active'}</span></p>
-                    <div style="margin-top: 10px;">
-                        <button class="action-btn ban-unban-user-btn"
-                                data-userid="${key}"
-                                style="background-color: ${isBanned ? 'var(--success-color)' : 'var(--danger-color)'};">
-                            ${isBanned ? 'Unban' : 'Ban'} User
-                        </button>
-                    </div>
-                    <div style="margin-top: 10px; display: flex; align-items: center; gap: 5px; flex-wrap: wrap;">
-                        <input type="number" class="input-field small-input" id="coins-change-${key}" placeholder="Amt">
-                        <button class="action-btn add-coins-btn" data-userid="${key}">Add</button>
-                        <button class="action-btn remove-coins-btn" data-userid="${key}">Remove</button>
+                    <p><strong>Auth:</strong> ${user.authProvider || 'N/A'}</p>
+                    <p><strong>Referral Code:</strong> ${user.referralCode || 'N/A'}</p>
+                    <p><strong>Status:</strong> <span class="${banStatusClass}">${banStatusText}</span></p>
+                    <div class="user-actions-group">
+                        ${editButton}
+                        <input type="number" class="admin-input-field" id="coinsInput_${key}" placeholder="Amount">
+                        <button class="admin-user-action-btn admin-coin-btn" data-userid="${key}" data-action="add">Add Coins</button>
+                        <button class="admin-user-action-btn admin-coin-btn" data-userid="${key}" data-action="set" style="background-color:var(--warning-color)">Set Coins</button>
                     </div>`;
                 adminUsersListDiv.appendChild(item);
             });
-
-            adminUsersListDiv.querySelectorAll('.ban-unban-user-btn').forEach(btn => btn.addEventListener('click', handleBanUnbanUser));
-            adminUsersListDiv.querySelectorAll('.add-coins-btn').forEach(btn => btn.addEventListener('click', handleModifyUserCoins));
-            adminUsersListDiv.querySelectorAll('.remove-coins-btn').forEach(btn => btn.addEventListener('click', handleModifyUserCoins));
+            adminUsersListDiv.querySelectorAll('.admin-user-action-btn').forEach(btn => btn.addEventListener('click', handleAdminUserAction));
+            updateAdminStats();
         }
 
-        async function handleBanUnbanUser(e) {
+        async function handleAdminUserAction(e) {
             const userId = e.target.dataset.userid;
-            const user = usersData[userId];
-            if (!user) { alert("User not found!"); return; }
+            const action = e.target.dataset.action;
+            if (!userId || !usersData[userId]) { alert("User not found."); return; }
 
-            const newBanStatus = !user.isBanned;
-            try {
-                await update(ref(db, `users/${userId}`), { isBanned: newBanStatus });
-                usersData[userId].isBanned = newBanStatus;
-                alert(`User ${user.name || userId} has been ${newBanStatus ? 'banned' : 'unbanned'}.`);
-                renderAdminUsersList();
-            } catch (error) {
-                console.error("Error updating ban status:", error);
-                alert("Failed to update ban status.");
-            }
-        }
-
-        async function handleModifyUserCoins(e) {
-            const userId = e.target.dataset.userid;
-            const user = usersData[userId];
-            if (!user) { alert("User not found!"); return; }
-
-            const amountInput = document.getElementById(`coins-change-${userId}`);
-            const amount = parseInt(amountInput.value);
-
-            if (isNaN(amount) || amount <= 0) {
-                alert("Please enter a valid positive amount.");
+            if (e.target.classList.contains('edit-btn')) {
+                openAdminEditUserModal(userId);
                 return;
             }
-
-            let newCoinTotal;
-            if (e.target.classList.contains('add-coins-btn')) {
-                newCoinTotal = user.coins + amount;
-            } else if (e.target.classList.contains('remove-coins-btn')) {
-                newCoinTotal = user.coins - amount;
-                if (newCoinTotal < 0) newCoinTotal = 0;
-            } else { return; }
-
+            e.target.disabled = true;
             try {
-                await update(ref(db, `users/${userId}`), { coins: newCoinTotal });
-                usersData[userId].coins = newCoinTotal;
-                alert(`Coins for ${user.name || userId} updated to ${newCoinTotal}.`);
-                amountInput.value = '';
+                if (action === 'add' || action === 'set') {
+                    const coinsInput = document.getElementById(`coinsInput_${userId}`);
+                    const amount = parseInt(coinsInput.value);
+                    if (isNaN(amount)) { alert("Invalid amount."); e.target.disabled = false; return; }
+
+                    const originalCoins = usersData[userId].coins || 0;
+                    let newCoinTotal;
+                    let transactionType = '';
+                    let transactionAmount = 0;
+
+                    if (action === 'add') {
+                        newCoinTotal = originalCoins + amount;
+                        transactionType = 'admin_gift';
+                        transactionAmount = amount;
+                    } else { // action === 'set'
+                        newCoinTotal = amount;
+                        if (newCoinTotal < 0) { alert("Coin total cannot be negative."); e.target.disabled = false; return; }
+
+                        if (newCoinTotal > originalCoins) {
+                            transactionType = 'admin_gift';
+                            transactionAmount = newCoinTotal - originalCoins;
+                        } else if (newCoinTotal < originalCoins) {
+                            transactionType = 'admin_deduction';
+                            transactionAmount = newCoinTotal - originalCoins; // This will be negative
+                        }
+                        // If newCoinTotal === originalCoins, no transaction needed, but update anyway
+                    }
+
+                    await update(ref(db, `users/${userId}`), { coins: newCoinTotal });
+                    usersData[userId].coins = newCoinTotal;
+
+                    if (transactionType && transactionAmount !== 0) { // Only log if there was a change
+                        await logTransaction(userId, transactionType, transactionAmount, { reason: `Admin action: ${action}` });
+                    }
+
+                    logAppEvent("admin_coin_update", { admin: getCurrentUserDbKey(), targetUserId: userId, action: action, amount: amount, oldTotal: originalCoins, newTotal: newCoinTotal });
+                    alert(`Coins for ${usersData[userId].name || userId} ${action === 'add' ? 'updated by ' + amount : 'set to ' + newCoinTotal}.`);
+                    coinsInput.value = '';
+                }
                 renderAdminUsersList();
-                if (getCurrentUserDbKey() === userId && !isAdminView) {
-                    updateCoinDisplayForCurrentUser();
-                }
+                updateAdminStats();
             } catch (error) {
-                console.error("Error modifying user coins:", error);
-                alert("Failed to modify user coins.");
-            }
+                console.error(`Admin action error for ${userId}:`, error);
+                logAppEvent("error", { function: "handleAdminUserAction", message: error.message, targetUserId: userId });
+                alert("Action failed. " + error.message);
+            } finally { if(e.target && e.target.disabled) e.target.disabled = false; }
         }
 
-        function renderAdminAppSettings() {
-            spinWheelConfigContainer.innerHTML = '';
-            segments.forEach((segment, index) => {
-                const itemDiv = document.createElement('div');
-                itemDiv.className = 'segment-config-item';
-                itemDiv.innerHTML = `
-                    <label for="segment-prize-${index}">Segment ${index + 1} (Value):</label>
-                    <input type="number" id="segment-prize-${index}" value="${segment.text}" min="0">
-                    <div class="segment-color-display" style="background-color: ${segment.color};"></div>
-                `;
-                spinWheelConfigContainer.appendChild(itemDiv);
-            });
+
+        function openAdminEditUserModal(userId) {
+            const user = usersData[userId];
+            if (!user) { alert("User data not found to edit."); return; }
+
+            document.getElementById('adminEditUserId').value = userId;
+            document.getElementById('adminEditUserName').value = user.name || '';
+            document.getElementById('adminEditUserEmail').value = user.email || '';
+            document.getElementById('adminEditUserPhone').value = user.phoneNumber || '';
+            document.getElementById('adminEditUserCoins').value = user.coins || 0;
+            document.getElementById('adminEditUserPassword').value = '';
+            document.getElementById('adminEditUserIsBanned').value = user.isBanned ? 'true' : 'false';
+
+            if (adminEditUserModal) adminEditUserModal.style.display = 'flex';
         }
 
-        saveSpinWheelConfigBtn.addEventListener('click', async () => {
-            const newSegments = [];
-            let allValid = true;
-            segments.forEach((originalSegment, index) => {
-                const prizeInput = document.getElementById(`segment-prize-${index}`);
-                const newPrizeText = prizeInput.value;
-                const newPrize = parseInt(newPrizeText);
+        if (adminEditUserForm) adminEditUserForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const userId = document.getElementById('adminEditUserId').value;
+            if (!userId || !usersData[userId]) { alert("User ID missing or user not found."); return; }
 
-                if (isNaN(newPrize) || newPrize < 0 || newPrizeText.trim() === "") {
-                    allValid = false;
+            const originalCoins = usersData[userId].coins || 0;
+            const newCoins = parseInt(document.getElementById('adminEditUserCoins').value) || 0;
+
+            const updates = {
+                name: document.getElementById('adminEditUserName').value.trim(),
+                email: document.getElementById('adminEditUserEmail').value.trim() || null,
+                phoneNumber: document.getElementById('adminEditUserPhone').value.trim() || null,
+                coins: newCoins,
+                isBanned: document.getElementById('adminEditUserIsBanned').value === 'true'
+            };
+            const newPassword = document.getElementById('adminEditUserPassword').value.trim();
+            if (newPassword && usersData[userId].authProvider === 'phone') {
+                if (newPassword.length < 6) {
+                    alert("If setting a new password, it must be at least 6 characters.");
+                    return;
                 }
-                newSegments.push({ text: String(newPrize), color: originalSegment.color });
-            });
-
-            if (!allValid) {
-                alert("Please enter valid, non-negative prize values for all segments.");
-                return;
+                updates.password = newPassword;
             }
 
+            showLoading(true);
             try {
-                await set(ref(db, 'appConfig/spinWheelSegments'), newSegments);
-                segments = newSegments;
-                numSegments = segments.length;
-                anglePerSegment = 360 / numSegments;
+                await update(ref(db, `users/${userId}`), updates);
+                Object.assign(usersData[userId], updates); // Update local cache
 
-                createWheel();
-                alert("Spin wheel prizes updated and saved globally!");
-                renderAdminAppSettings();
+                // Log transaction for coin changes from edit modal
+                if (newCoins !== originalCoins) {
+                    const coinDifference = newCoins - originalCoins;
+                    const transactionType = coinDifference > 0 ? 'admin_gift' : 'admin_deduction';
+                    await logTransaction(userId, transactionType, coinDifference, { reason: "Admin edit user details" });
+                }
+
+
+                logAppEvent("admin_user_details_updated", { admin: getCurrentUserDbKey(), targetUserId: userId, updates });
+                alert(`User ${userId} details updated successfully.`);
+                if (adminEditUserModal) adminEditUserModal.style.display = 'none';
+                renderAdminUsersList();
+                updateAdminStats();
             } catch (error) {
-                console.error("Error saving spin wheel configuration to Firebase:", error);
-                alert("Failed to save spin wheel configuration. Please try again.");
+                console.error("Error updating user details:", error);
+                logAppEvent("error", { function: "adminEditUserFormSubmit", message: error.message, targetUserId: userId });
+                alert("Failed to update user details. " + error.message);
+            } finally {
+                showLoading(false);
             }
         });
 
+        function renderAdminAllTransactions() {
+            if (!adminAllTransactionsListDiv) return;
+            adminAllTransactionsListDiv.innerHTML = '';
+
+            const searchTerm = adminAllTxSearchInput ? adminAllTxSearchInput.value.toLowerCase() : "";
+            const typeFilter = adminAllTxTypeFilter ? adminAllTxTypeFilter.value : "all";
+
+            let filteredTransactions = [...allSystemTransactionsCache];
+
+            if (typeFilter !== 'all') {
+                filteredTransactions = filteredTransactions.filter(tx => tx.type === typeFilter);
+            }
+
+            if (searchTerm) {
+                filteredTransactions = filteredTransactions.filter(tx => {
+                    const userData = usersData[tx.userId];
+                    const userName = userData ? userData.name : '';
+                    const userEmail = userData ? userData.email : '';
+                    return (
+                        tx.userId.toLowerCase().includes(searchTerm) ||
+                        (userName && userName.toLowerCase().includes(searchTerm)) ||
+                        (userEmail && userEmail.toLowerCase().includes(searchTerm)) ||
+                        tx.type.toLowerCase().includes(searchTerm) ||
+                        (tx.details?.upiId && tx.details.upiId.toLowerCase().includes(searchTerm)) ||
+                        (tx.details?.withdrawalId && tx.details.withdrawalId.toLowerCase().includes(searchTerm)) ||
+                        (tx.details?.codeUsed && tx.details.codeUsed.toLowerCase().includes(searchTerm))
+                    );
+                });
+            }
+
+            if (filteredTransactions.length === 0) {
+                adminAllTransactionsListDiv.innerHTML = '<p>No matching transactions found.</p>';
+                return;
+            }
+
+            filteredTransactions.forEach(tx => {
+                const item = document.createElement('div');
+                item.className = 'all-transaction-item';
+                const userData = usersData[tx.userId];
+                const userNameDisplay = userData ? `${userData.name || 'N/A'} (${tx.userId})` : tx.userId;
+                const dateString = tx.timestamp ? new Date(tx.timestamp).toLocaleString() : 'Processing...';
+                let description = tx.type.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+                let detailsString = '';
+
+                if (tx.details) {
+                    if (tx.type === 'spin_win') detailsString = `Segment: ${tx.details.segmentValue}`;
+                    else if (tx.type === 'bonus') detailsString = `Reason: ${tx.details.reason}`;
+                    else if (tx.type === 'referral_bonus') detailsString = `Code: ${tx.details.codeUsed}, Referrer: ${usersData[tx.details.referrerId]?.name || tx.details.referrerId}`;
+                    else if (tx.type === 'admin_gift' || tx.type === 'admin_deduction') detailsString = `Reason: ${tx.details.reason || 'Admin action'}`;
+                    else if (tx.type === 'withdrawal_request') {
+                        let currentStatus = 'pending';
+                        if (tx.details?.withdrawalId && allWithdrawals && allWithdrawals[tx.details.withdrawalId]) {
+                            currentStatus = allWithdrawals[tx.details.withdrawalId].status;
+                        } else if (tx.details?.status) {
+                            currentStatus = tx.details.status;
+                        }
+                        detailsString = `UPI: ${tx.details.upiId}, WD_ID: ${tx.details.withdrawalId}, Status: ${currentStatus}`;
+                    }
+                    else if (tx.type === 'withdrawal_reject_refund') detailsString = `WD_ID: ${tx.details.withdrawalId}`;
+                    else detailsString = JSON.stringify(tx.details);
+                }
+
+                item.innerHTML = `
+                    <p><strong>User:</strong> ${userNameDisplay}</p>
+                    <p><strong>Date:</strong> ${dateString}</p>
+                    <p><strong>Type:</strong> ${description}</p>
+                    <p><strong>Amount:</strong> ${tx.amount > 0 ? '+' : ''}${tx.amount} coins</p>
+                    ${detailsString ? `<p><strong>Details:</strong> ${detailsString}</p>` : ''}
+                `;
+                adminAllTransactionsListDiv.appendChild(item);
+            });
+        }
+
+        function renderAdminAppSettings() {
+            if (!adminSettingsListDiv) return;
+            adminSettingsListDiv.innerHTML = '';
+
+            const settingsToRender = [
+                { key: 'dailyBonusAmount', label: 'Daily Bonus Amount', current: appSettings.dailyBonusAmount, type: 'number' },
+                { key: 'referralBonusAmount', label: 'Referral Bonus Amount', current: appSettings.referralBonusAmount, type: 'number' },
+                { key: 'minWithdrawal', label: 'Min Withdrawal Coins', current: appSettings.minWithdrawal, type: 'number' },
+                { key: 'maxWithdrawal', label: 'Max Withdrawal Coins', current: appSettings.maxWithdrawal, type: 'number' },
+                { key: 'shareLink', label: 'App Share Link', current: appSettings.shareLink, type: 'text' },
+                { key: 'contactSupportLink', label: 'Contact Support Link', current: appSettings.contactSupportLink, type: 'text' },
+                { key: 'adCodeAfterSpin', label: 'Ad Code (after spin)', current: appSettings.adCodeAfterSpin, type: 'textarea' }
+            ];
+
+            settingsToRender.forEach(setting => {
+                const item = document.createElement('div');
+                item.className = 'admin-setting-item';
+                let inputHtml = '';
+                if (setting.type === 'textarea') {
+                    inputHtml = `<textarea id="adminSetting_${setting.key}" rows="4">${setting.current}</textarea>`;
+                } else {
+                    inputHtml = `<input type="${setting.type}" id="adminSetting_${setting.key}" value="${setting.current}" ${setting.type === 'number' ? 'min="0"' : ''}>`;
+                }
+
+                item.innerHTML = `
+                    <p style="display: flex; flex-direction: column; align-items: flex-start;">
+                        <strong>${setting.label}:</strong>
+                        ${inputHtml}
+                        <button class="admin-action-btn" data-settingkey="${setting.key}" style="background-color:var(--success-color); margin-top: 5px; margin-left:0;">Save</button>
+                    </p>`;
+                adminSettingsListDiv.appendChild(item);
+            });
+
+            adminSettingsListDiv.querySelectorAll('.admin-action-btn').forEach(btn => {
+                btn.addEventListener('click', handleAdminSettingSave);
+            });
+        }
+
+        async function handleAdminSettingSave(e) {
+            const settingKey = e.target.dataset.settingkey;
+            const inputElement = document.getElementById(`adminSetting_${settingKey}`);
+            if (!inputElement) return;
+
+            let newValue = inputElement.value; // For textarea and text, value is already string
+            if (inputElement.type === 'number') {
+                newValue = parseInt(newValue);
+                if (isNaN(newValue) || (settingKey.includes('Amount') && newValue < 0) || (settingKey.includes('Withdrawal') && newValue < 1) ) {
+                    alert("Please enter a valid positive number for numeric fields.");
+                    return;
+                }
+            } else if (inputElement.type === 'text' || inputElement.type === 'textarea') {
+                // For links, allow empty to remove them, but for ad code, it's fine to be empty.
+                // Specific validation for non-empty links if needed.
+                newValue = newValue.trim();
+                 if (!newValue && (settingKey === 'shareLink' || settingKey === 'contactSupportLink')) {
+                    if (confirm(`Are you sure you want to set an empty ${settingKey.replace(/([A-Z])/g, ' $1').toLowerCase().trim()}? This might remove the functionality.`)) {
+                        // Proceed with empty value
+                    } else {
+                        inputElement.value = appSettings[settingKey]; // Revert to old value
+                        return;
+                    }
+                }
+            }
+
+
+            e.target.disabled = true; e.target.textContent = "Saving...";
+            try {
+                await update(ref(db, `appConfig/settings`), { [settingKey]: newValue });
+                appSettings[settingKey] = newValue;
+                logAppEvent("app_setting_updated", { admin: getCurrentUserDbKey(), setting: settingKey, value: newValue });
+                alert(`${settingKey.replace(/([A-Z])/g, ' $1').trim()} updated successfully.`);
+                renderAdminAppSettings();
+                updateUIDisplayForCurrentUser();
+            } catch (error) {
+                console.error("Error saving app setting:", error);
+                logAppEvent("error", { function: "handleAdminSettingSave", message: error.message });
+                alert("Failed to save setting. " + error.message);
+            } finally {
+                if (e.target) {
+                    e.target.disabled = false; e.target.textContent = "Save";
+                }
+            }
+        }
+
+        function renderAdminWheelSettings() {
+            if (!adminWheelSettingsListDiv) return;
+            adminWheelSettingsListDiv.innerHTML = '';
+            activeWheelSegments.forEach((segment, index) => {
+                const item = document.createElement('div'); item.className = 'wheel-segment-admin-item';
+                item.innerHTML = `
+                    <span>Segment ${index + 1}:</span>
+                    <span class="wheel-segment-color-preview" style="background-color:${segment.color};"></span>
+                    <span>Color: ${segment.color}</span>
+                    <input type="number" id="wheelSegmentCoin_${index}" value="${segment.text}" min="0">
+                    <span>coins</span>`;
+                adminWheelSettingsListDiv.appendChild(item);
+            });
+        }
+
+        if (saveWheelSettingsBtn) saveWheelSettingsBtn.addEventListener('click', async () => {
+            const newSegments = []; let isValid = true;
+            activeWheelSegments.forEach((segment, index) => {
+                const coinInput = document.getElementById(`wheelSegmentCoin_${index}`);
+                if (!coinInput) { isValid = false; return; }
+                const coinValue = parseInt(coinInput.value);
+                if (isNaN(coinValue) || coinValue < 0) {
+                    isValid = false; alert(`Invalid coin value for Segment ${index + 1}.`); return;
+                }
+                newSegments.push({ text: coinValue.toString(), color: segment.color });
+            });
+            if (!isValid) return;
+            saveWheelSettingsBtn.disabled = true; saveWheelSettingsBtn.textContent = "Saving...";
+            try {
+                await set(ref(db, 'appConfig/wheelSegments'), newSegments);
+                activeWheelSegments = newSegments;
+                numSegments = activeWheelSegments.length; anglePerSegment = 360 / numSegments;
+                createWheel();
+                logAppEvent("wheel_settings_updated", { admin: getCurrentUserDbKey(), newSegments: newSegments });
+                alert("Wheel settings saved!");
+            } catch (error) {
+                console.error("Error saving wheel settings:", error);
+                logAppEvent("error", { function: "saveWheelSettings", message: error.message });
+                alert("Failed to save. " + error.message);
+            } finally { if(saveWheelSettingsBtn) {saveWheelSettingsBtn.disabled = false; saveWheelSettingsBtn.textContent = "Save Wheel Settings";} }
+        });
+
+        function renderAdminAppLogs() {
+            if (!adminAppLogsListDiv) return;
+            adminAppLogsListDiv.innerHTML = '';
+            if (appLogs.length === 0) {
+                adminAppLogsListDiv.innerHTML = '<p>No application logs found.</p>';
+                return;
+            }
+            appLogs.forEach(log => {
+                const item = document.createElement('div');
+                item.style.borderBottom = "1px solid #ddd";
+                item.style.padding = "5px 0";
+                const dateString = log.timestamp ? new Date(log.timestamp).toLocaleString() : 'N/A';
+                let detailsContent = JSON.stringify(log.details, null, 2);
+                if (detailsContent.length > 300) detailsContent = detailsContent.substring(0,300) + "... (truncated)";
+
+                item.innerHTML = `<strong>${dateString}</strong> - [${log.type.toUpperCase()}] User: ${log.userId || 'N/A'}<br/>
+                                  <pre style="white-space: pre-wrap; word-break: break-all; margin:0; font-size:0.9em;">${detailsContent}</pre>`;
+                adminAppLogsListDiv.appendChild(item);
+            });
+        }
 
         async function initializeAppLogic() {
-            document.body.style.cursor = 'wait';
+            showLoading(true);
             await loadDataFromFirebase();
             createWheel();
 
             onAuthStateChanged(auth, async (firebaseUser) => {
-                document.body.style.cursor = 'wait';
+                showLoading(true);
+                if (authMessageDiv) authMessageDiv.style.display = 'none';
+
                 if (firebaseUser) {
-                    currentUser = firebaseUser;
-                    currentUserUid = firebaseUser.uid;
-                    currentUserPhoneNumber = null;
-                    sessionStorage.removeItem('spinWheelCurrentUser');
+                    currentUser = firebaseUser; currentUserUid = firebaseUser.uid;
+                    currentUserPhoneNumber = null; localStorage.removeItem('spinWheelCurrentUser');
 
                     let userData = usersData[currentUserUid];
                     if (!userData) {
-                        const newUserProfile = {
-                            name: firebaseUser.displayName || "Google User", email: firebaseUser.email,
-                            coins: INITIAL_COINS, phoneNumber: firebaseUser.phoneNumber || null,
-                            registeredAt: fbServerTimestamp(), authProvider: "google", isBanned: false
-                        };
-                        try {
-                            await set(ref(db, 'users/' + currentUserUid), newUserProfile);
-                            usersData[currentUserUid] = { ...newUserProfile, registeredAt: Date.now(), authProvider: "google", isBanned: false };
+                        const userRef = ref(db, 'users/' + currentUserUid);
+                        const snapshot = await get(userRef);
+                        if (!snapshot.exists()) {
+                             const authProvider = firebaseUser.providerData?.[0]?.providerId.includes('google') ? "google" : "email";
+                             userData = await createNewUserProfile(currentUserUid, firebaseUser.displayName, firebaseUser.email, authProvider, firebaseUser.phoneNumber, null);
+                        } else {
+                            usersData[currentUserUid] = snapshot.val();
                             userData = usersData[currentUserUid];
-                        } catch (error) { console.error("Error creating Google user profile:", error); await fbSignOut(auth); document.body.style.cursor = 'default'; return; }
+                            if (typeof userData.referralCode === 'undefined' || !userData.referralCode) {
+                                const newReferralCode = generateReferralCode(currentUserUid);
+                                const updates = { referralCode: newReferralCode };
+                                if (typeof userData.hasUsedReferralCode === 'undefined') updates.hasUsedReferralCode = false;
+                                if (typeof userData.referredBy === 'undefined') updates.referredBy = null;
+                                if (typeof userData.password === 'undefined' && authProvider !== 'phone') updates.password = null;
+
+                                await update(userRef, updates);
+                                await set(ref(db, `referralCodes/${newReferralCode}`), currentUserUid);
+                                Object.assign(usersData[currentUserUid], updates);
+                                userData = usersData[currentUserUid];
+                                logAppEvent("referral_code_generated_retroactively", { userId: currentUserUid, code: newReferralCode });
+                            }
+                        }
                     }
 
-                    if (userData.isBanned) {
-                        alert('Your account has been suspended. Please contact support.');
+                    if (userData && userData.isBanned) {
+                        logAppEvent("banned_user_login_attempt", { userId: currentUserUid });
                         await fbSignOut(auth);
-                        document.body.style.cursor = 'default';
-                        return;
+                        showAuthScreen(`Account for ${userData.email || currentUserUid} is banned.`);
+                    } else if (userData) {
+                        const currentAuthProvider = firebaseUser.providerData?.[0]?.providerId.includes('google') ? "google" : "email";
+                        if (userData.authProvider !== currentAuthProvider || (userData.email !== firebaseUser.email && firebaseUser.email) ) {
+                            const profileUpdates = {
+                                authProvider: currentAuthProvider,
+                                email: firebaseUser.email || userData.email,
+                                name: firebaseUser.displayName || userData.name
+                            };
+                             if (firebaseUser.phoneNumber && !userData.phoneNumber) {
+                                profileUpdates.phoneNumber = firebaseUser.phoneNumber;
+                            }
+                            update(ref(db, 'users/' + currentUserUid), profileUpdates)
+                            .then(() => {
+                                if (usersData[currentUserUid]) {
+                                   Object.assign(usersData[currentUserUid], profileUpdates);
+                                }
+                            })
+                            .catch(err => {
+                                console.error("Error updating user auth provider/email:", err);
+                                logAppEvent("error", { function: "initializeAppLogic.updateAuthProvider", message: err.message, userId: currentUserUid });
+                            });
+                        }
+                        showAppScreen();
+                    } else {
+                        showAuthScreen("User data error. Please try again.");
                     }
-                    if (!userData.authProvider || userData.isBanned === undefined) {
-                        const updates = {};
-                        if (!userData.authProvider) updates.authProvider = "google";
-                        if (userData.isBanned === undefined) updates.isBanned = false;
-                        update(ref(db, 'users/' + currentUserUid), updates).catch(console.error);
-                        if (!userData.authProvider) usersData[currentUserUid].authProvider = "google";
-                        if (userData.isBanned === undefined) usersData[currentUserUid].isBanned = false;
-                    }
-                    showAppScreen();
+
                 } else {
                     currentUser = null; currentUserUid = null;
-                    const loggedInUserPhone = sessionStorage.getItem('spinWheelCurrentUser');
+                    const loggedInUserPhone = localStorage.getItem('spinWheelCurrentUser');
                     if (loggedInUserPhone && usersData[loggedInUserPhone]) {
                         if (usersData[loggedInUserPhone].isBanned) {
-                            alert('Your account has been suspended. Please contact support.');
-                            sessionStorage.removeItem('spinWheelCurrentUser');
-                            currentUserPhoneNumber = null;
-                            showAuthScreen();
+                            logAppEvent("banned_user_login_attempt_phone", { phone: loggedInUserPhone });
+                            localStorage.removeItem('spinWheelCurrentUser');
+                            showAuthScreen(`Account for ${loggedInUserPhone} is banned.`);
                         } else {
                             currentUserPhoneNumber = loggedInUserPhone;
+                            if (typeof usersData[loggedInUserPhone].referralCode === 'undefined' || !usersData[loggedInUserPhone].referralCode) {
+                                const newReferralCode = generateReferralCode(loggedInUserPhone);
+                                const userRef = ref(db, 'users/' + loggedInUserPhone);
+                                const updates = { referralCode: newReferralCode };
+                                if (typeof usersData[loggedInUserPhone].hasUsedReferralCode === 'undefined') updates.hasUsedReferralCode = false;
+                                if (typeof usersData[loggedInUserPhone].referredBy === 'undefined') updates.referredBy = null;
+                                if (typeof usersData[loggedInUserPhone].password === 'undefined') updates.password = usersData[loggedInUserPhone].name;
+
+                                await update(userRef, updates);
+                                await set(ref(db, `referralCodes/${newReferralCode}`), loggedInUserPhone);
+                                Object.assign(usersData[loggedInUserPhone], updates);
+                                logAppEvent("referral_code_generated_retroactively_phone", { userId: loggedInUserPhone, code: newReferralCode });
+                            }
                             showAppScreen();
                         }
                     } else {
                         currentUserPhoneNumber = null;
+                        localStorage.removeItem('spinWheelCurrentUser');
                         showAuthScreen();
                     }
                 }
-                updateCoinDisplayForCurrentUser(true);
-                document.body.style.cursor = 'default';
+                updateUIDisplayForCurrentUser(true);
+                showLoading(false);
             });
         }
-
         initializeAppLogic();
-
     </script>
 </body>
 </html>
